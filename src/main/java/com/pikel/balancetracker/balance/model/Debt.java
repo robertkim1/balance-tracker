@@ -1,10 +1,11 @@
-package com.pikel.balancetracker;
+package com.pikel.balancetracker.balance.model;
 
 import java.time.LocalDate;
 
 public class Debt {
     private String source;
     private double amount;
+    // user inputs soonest date of payment
     private LocalDate dueDate;
 
     public Debt() {

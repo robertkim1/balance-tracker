@@ -1,16 +1,26 @@
-package com.pikel.balancetracker;
+package com.pikel.balancetracker.balance;
 
-import java.time.LocalDate;
+import com.pikel.balancetracker.balance.model.Debt;
+import com.pikel.balancetracker.balance.model.Income;
+import com.pikel.balancetracker.balance.model.ProjectionTimeframe;
+import com.pikel.balancetracker.balance.model.SummarizeDateBy;
+
 import java.util.List;
 
 public class BalanceDataRequest {
     private List<Debt> debts;
     private List<Income> incomes;
+    private double currentBalance;
     // assume start date is date of submission
     private ProjectionTimeframe projectionTimeframe;
     private SummarizeDateBy summarizeDateBy;
 
-    public BalanceDataRequest() {
+    public double getCurrentBalance() {
+        return currentBalance;
+    }
+
+    public void setCurrentBalance(double currentBalance) {
+        this.currentBalance = currentBalance;
     }
 
     public List<Debt> getDebts() {
