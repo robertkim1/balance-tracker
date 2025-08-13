@@ -2,11 +2,11 @@ package com.pikel.balancetracker.balance.model;
 
 import java.time.LocalDate;
 
-public class BalancePerDate {
+public class DatedBalance {
     private double balance;
     private LocalDate date;
 
-    public BalancePerDate(double balance, LocalDate date) {
+    public DatedBalance(double balance, LocalDate date) {
         this.balance = balance;
         this.date = date;
     }

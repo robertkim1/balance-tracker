@@ -1,6 +1,6 @@
 package com.pikel.balancetracker.balance;
 
-import com.pikel.balancetracker.balance.model.BalancePerDate;
+import com.pikel.balancetracker.balance.model.DatedBalance;
 import com.pikel.balancetracker.balance.model.Debt;
 import com.pikel.balancetracker.balance.model.Income;
 import com.pikel.balancetracker.balance.model.SummarizeDateBy;
@@ -20,13 +20,11 @@ public class BalanceTrackerService {
      * @param request from with lists of debts, incomes, current balance, etc
      * @return full balance summary
      */
-    public List<BalancePerDate> getBalanceSummary(BalanceDataRequest request) {
-        List<Debt> debts = request.getDebts();
-        List<Income> incomes = request.getIncomes();
+    public List<DatedBalance> getBalanceSummary(BalanceDataRequest request) {
         PriorityQueue<Debt> debtQueue = new PriorityQueue<>(Comparator.comparing(Debt::getDueDate));
         PriorityQueue<Income> incomeQueue = new PriorityQueue<>(Comparator.comparing(Income::getPayDate));
-        debtQueue.addAll(debts);
-        incomeQueue.addAll(incomes);
+        debtQueue.addAll(request.getDebts());
+        incomeQueue.addAll(request.getIncomes());
 
         SummarizeDateBy summarizeDateBy = request.getSummarizeDateBy();
         double currBalance = request.getCurrentBalance();
@@ -40,47 +38,62 @@ public class BalanceTrackerService {
             case MONTH -> (int) ChronoUnit.MONTHS.between(startDate, endDate);
         };
 
-        List<BalancePerDate> outputBalanceList = new ArrayList<>();
-        outputBalanceList.add(new BalancePerDate(currBalance, startDate));
+        List<DatedBalance> outputBalanceList = new ArrayList<>();
+        outputBalanceList.add(new DatedBalance(currBalance, startDate));
+
         for (int i = 0; i < numOfDataPoints; i++) {
-            // TODO: gotta check this later
-            LocalDate currDate = switch (summarizeDateBy) {
-                case DAY -> startDate.plusDays(i);
-                case WEEK -> startDate.plusWeeks(i);
-                case MONTH -> startDate.plusMonths(i);
-            };
-            Debt debtPeek = debtQueue.peek();
-            if (debtPeek != null && (currDate.isEqual(debtPeek.getDueDate()) || currDate.isAfter(debtPeek.getDueDate()))) {
-                Debt debtPoll = debtQueue.poll();
-                if (debtPoll != null) {
-                    currBalance -= debtPoll.getAmount();
-                    LocalDate debtPollDate = debtPoll.getDueDate();
-                    LocalDate newDueDate = switch (summarizeDateBy) {
-                        case DAY -> debtPollDate.plusDays(i);
-                        case WEEK -> debtPollDate.plusWeeks(i);
-                        case MONTH -> debtPollDate.plusMonths(i);
-                    };
-                    debtPoll.setDueDate(newDueDate);
-                    debtQueue.add(debtPoll);
-                }
-            }
-            Income incomePeek = incomeQueue.peek();
-            if (incomePeek != null && (currDate.isEqual(incomePeek.getPayDate()) || currDate.isAfter(incomePeek.getPayDate()))) {
-                Income incomePoll = incomeQueue.poll();
-                if (incomePoll != null) {
-                    currBalance += incomePoll.getAmount();
-                    LocalDate incomePollDate = incomePoll.getPayDate();
-                    LocalDate newPayDate = switch (summarizeDateBy) {
-                        case DAY -> incomePollDate.plusDays(i);
-                        case WEEK -> incomePollDate.plusWeeks(i);
-                        case MONTH -> incomePollDate.plusMonths(i);
-                    };
-                    incomePoll.setPayDate(newPayDate);
-                    incomeQueue.add(incomePoll);
-                }
-            }
-            outputBalanceList.add(new BalancePerDate(currBalance, startDate));
+            LocalDate currDate = incrementDate(startDate, i, summarizeDateBy);
+            currBalance = processQueue(
+                    debtQueue, currDate, currBalance, summarizeDateBy, i, false
+            );
+            currBalance = processQueue(
+                    incomeQueue, currDate, currBalance, summarizeDateBy, i, true
+            );
+            outputBalanceList.add(new DatedBalance(currBalance, currDate));
         }
         return outputBalanceList;
+    }
+
+    private <T> double processQueue(
+            PriorityQueue<T> queue,
+            LocalDate currDate,
+            double currBalance,
+            SummarizeDateBy summarizeDateBy,
+            int step,
+            boolean isIncome
+    ) {
+        if (queue.isEmpty()) return currBalance;
+
+        LocalDate date = isIncome
+                ? ((Income) queue.peek()).getPayDate()
+                : ((Debt) queue.peek()).getDueDate();
+
+        if (currDate.isBefore(date)) return currBalance;
+
+        T item = queue.poll();
+        if (item != null) {
+            double amount = isIncome
+                    ? ((Income) item).getAmount()
+                    : ((Debt) item).getAmount();
+
+            currBalance += isIncome ? amount : -amount;
+
+            LocalDate newDate = incrementDate(date, step, summarizeDateBy);
+            if (isIncome) {
+                ((Income) item).setPayDate(newDate);
+            } else {
+                ((Debt) item).setDueDate(newDate);
+            }
+            queue.add(item);
+        }
+        return currBalance;
+    }
+
+    private LocalDate incrementDate(LocalDate date, int step, SummarizeDateBy summarizeDateBy) {
+        return switch (summarizeDateBy) {
+            case DAY -> date.plusDays(step);
+            case WEEK -> date.plusWeeks(step);
+            case MONTH -> date.plusMonths(step);
+        };
     }
 }

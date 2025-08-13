@@ -1,6 +1,6 @@
 package com.pikel.balancetracker.balance;
 
-import com.pikel.balancetracker.balance.model.BalancePerDate;
+import com.pikel.balancetracker.balance.model.DatedBalance;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,7 +19,7 @@ public class BalanceTrackerController {
     }
 
     @PostMapping("/submit")
-    public List<BalancePerDate> submitBalanceData(@RequestBody BalanceDataRequest request) {
+    public List<DatedBalance> submitBalanceData(@RequestBody BalanceDataRequest request) {
         return balanceTrackerService.getBalanceSummary(request);
     }
 }
