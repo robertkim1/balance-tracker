@@ -45,22 +45,22 @@ class BalanceTrackerServiceTest {
         assertFalse(res.isEmpty());
 
         // assert initial balance
-        assertEquals(1000.0, res.getFirst().getBalance());
+        assertEquals(1000.0, res.getFirst().balance());
 
         // assert balance on first income pay date
         LocalDate incomeDate = income1.date();
         DatedBalance incomeBalance = res.stream()
-                .filter(datedBalance -> datedBalance.getDate().equals(incomeDate))
+                .filter(datedBalance -> datedBalance.date().equals(incomeDate))
                 .findFirst()
                 .orElseThrow();
-        assertEquals(1500.0, incomeBalance.getBalance());
+        assertEquals(1500.0, incomeBalance.balance());
 
         // assert balance on first debt due date
         LocalDate debtDate = debt1.date();
         DatedBalance debtBalance = res.stream()
-                .filter(datedBalance -> datedBalance.getDate().equals(debtDate))
+                .filter(datedBalance -> datedBalance.date().equals(debtDate))
                 .findFirst()
                 .orElseThrow();
-        assertEquals(1400.0, debtBalance.getBalance());
+        assertEquals(1400.0, debtBalance.balance());
     }
 }
