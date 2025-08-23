@@ -24,13 +24,15 @@ class BalanceTrackerServiceTest {
                 "Car Loan",
                 100.0,
                 LocalDate.now().plusDays(3),
-                TransactionType.DEBT
+                TransactionType.DEBT,
+                PayPeriod.MONTHLY
         );
         Transaction income1 = new Transaction(
                 "Salary",
                 500.0,
                 LocalDate.now().plusDays(2),
-                TransactionType.INCOME
+                TransactionType.INCOME,
+                PayPeriod.BIWEEKLY
         );
         BalanceDataRequest request = new BalanceDataRequest(
                 List.of(debt1, income1),

@@ -6,9 +6,10 @@ public record Transaction(
         String sourceName,
         double amount,
         LocalDate date, // user inputs soonest date of payment
-        TransactionType type
+        TransactionType type, // debt or income
+        PayPeriod payPeriod
 ) {
     public Transaction withDate(LocalDate newDate) {
-        return new Transaction(sourceName, amount, newDate, type);
+        return new Transaction(sourceName, amount, newDate, type, payPeriod);
     }
 }

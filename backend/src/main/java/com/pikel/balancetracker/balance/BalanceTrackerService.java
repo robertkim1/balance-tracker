@@ -1,9 +1,6 @@
 package com.pikel.balancetracker.balance;
 
-import com.pikel.balancetracker.balance.model.DatedBalance;
-import com.pikel.balancetracker.balance.model.SummarizeDateBy;
-import com.pikel.balancetracker.balance.model.Transaction;
-import com.pikel.balancetracker.balance.model.TransactionType;
+import com.pikel.balancetracker.balance.model.*;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -55,13 +52,20 @@ public class BalanceTrackerService {
                 double amount = currTransaction.amount();
                 currBalance += currTransaction.type() == TransactionType.INCOME ? amount : -amount;
                 // since date is always updated here we just step once
-                Transaction newTransaction = currTransaction.withDate(
-                        incrementDate(currDate, 1, SummarizeDateBy.MONTH)
-                );
+                Transaction newTransaction = nextTransactionOccurrence(currTransaction, currDate);
                 queue.add(newTransaction);
             }
         }
         return currBalance;
+    }
+
+    private Transaction nextTransactionOccurrence(Transaction currTransaction, LocalDate currDate) {
+        var nextDate = switch (currTransaction.payPeriod()) {
+            case WEEKLY   -> incrementDate(currDate, 1, SummarizeDateBy.WEEK);
+            case BIWEEKLY -> incrementDate(currDate, 2, SummarizeDateBy.WEEK);
+            case MONTHLY  -> incrementDate(currDate, 1, SummarizeDateBy.MONTH);
+        };
+        return currTransaction.withDate(nextDate);
     }
 
     private LocalDate incrementDate(LocalDate date, int step, SummarizeDateBy summarizeDateBy) {
