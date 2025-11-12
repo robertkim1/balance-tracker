@@ -1,6 +1,7 @@
 package com.pikel.balancetracker.balance;
 
 import com.pikel.balancetracker.balance.model.*;
+import com.pikel.balancetracker.utils.DateUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -20,17 +21,20 @@ class BalanceTrackerServiceTest {
 
     @Test
     void getBalanceSummary() {
+        LocalDate testDate = LocalDate.of(2025, 11, 14);
         Transaction debt1 = new Transaction(
                 "Car Loan",
                 100.0,
-                LocalDate.now().plusDays(3),
-                TransactionType.DEBT
+                testDate.plusDays(3),
+                TransactionType.DEBT,
+                PayPeriod.MONTHLY
         );
         Transaction income1 = new Transaction(
                 "Salary",
                 500.0,
-                LocalDate.now().plusDays(2),
-                TransactionType.INCOME
+                DateUtils.findNext1stOr15th(testDate),
+                TransactionType.INCOME,
+                PayPeriod.SEMIMONTHLY
         );
         BalanceDataRequest request = new BalanceDataRequest(
                 List.of(debt1, income1),
