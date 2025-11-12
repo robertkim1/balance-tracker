@@ -43,28 +43,28 @@ class BalanceTrackerServiceTest {
                 SummarizeDateBy.DAY
         );
 
-        List<DatedBalance> res = balanceTrackerService.getBalanceSummary(request);
+        List<DataPointPerDate> res = balanceTrackerService.getBalanceSummary(request);
 
         assertNotNull(res);
         assertFalse(res.isEmpty());
 
         // assert initial balance
-        assertEquals(1000.0, res.getFirst().balance());
+        assertEquals(1000.0, res.getFirst().dataPoint().balance());
 
         // assert balance on first income pay date
         LocalDate incomeDate = income1.date();
-        DatedBalance incomeBalance = res.stream()
+        DataPointPerDate incomeBalance = res.stream()
                 .filter(datedBalance -> datedBalance.date().equals(incomeDate))
                 .findFirst()
                 .orElseThrow();
-        assertEquals(1500.0, incomeBalance.balance());
+        assertEquals(1500.0, incomeBalance.dataPoint().balance());
 
         // assert balance on first debt due date
         LocalDate debtDate = debt1.date();
-        DatedBalance debtBalance = res.stream()
+        DataPointPerDate debtBalance = res.stream()
                 .filter(datedBalance -> datedBalance.date().equals(debtDate))
                 .findFirst()
                 .orElseThrow();
-        assertEquals(1400.0, debtBalance.balance());
+        assertEquals(1400.0, debtBalance.dataPoint().balance());
     }
 }

@@ -2,7 +2,7 @@ package com.pikel.balancetracker.balance.model;
 
 import java.time.LocalDate;
 
-public record DatedBalance(
-        double balance,
+public record DataPointPerDate(
+        DataPoint dataPoint,
         LocalDate date
 ) {}

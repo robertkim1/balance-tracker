@@ -23,7 +23,7 @@ public class BalanceTrackerService {
      * @param request from with lists of debts, incomes, current balance, etc
      * @return full balance summary
      */
-    public List<DatedBalance> getBalanceSummary(BalanceDataRequest request) {
+    public List<DataPointPerDate> getBalanceSummary(BalanceDataRequest request) {
         validateRequest(request);
 
         try {
@@ -39,13 +39,16 @@ public class BalanceTrackerService {
             double currBalance = request.currentBalance();
 
             // output balance list pairing balance number to a date
-            List<DatedBalance> outputBalanceList = new ArrayList<>();
+            List<DataPointPerDate> outputBalanceList = new ArrayList<>();
 
             LocalDate currDate = startDate;
 
             while (!currDate.isAfter(endDate)) {
-                currBalance = processQueue(transactionQueue, currDate, currBalance);
-                outputBalanceList.add(new DatedBalance(currBalance, currDate));
+                DataPoint dataPoint = processQueue(transactionQueue, currDate, currBalance);
+                if (dataPoint != null) {
+                    currBalance = dataPoint.balance();
+                }
+                outputBalanceList.add(new DataPointPerDate(dataPoint, currDate));
                 currDate = incrementDate(currDate, summarizeDateBy);
             }
 
@@ -136,15 +139,18 @@ public class BalanceTrackerService {
         }
     }
 
-    private double processQueue(
+    private DataPoint processQueue(
             PriorityQueue<Transaction> queue,
             LocalDate currDate,
             double currBalance
     ) {
-        if (queue.isEmpty()) return currBalance;
+        if (queue.isEmpty()) return null;
 
         int processedCount = 0;
-        int maxProcessPerDate = 100; // Prevent infinite loops
+        int maxProcessPerDate = 100;
+
+        List<Transaction> transactions = new ArrayList<>();
+        double runningBalance = currBalance;
 
         while (!queue.isEmpty() && (!queue.peek().date().isAfter(currDate))) {
             if (++processedCount > maxProcessPerDate) {
@@ -153,14 +159,15 @@ public class BalanceTrackerService {
 
             Transaction currTransaction = queue.poll();
             if (currTransaction != null) {
+                transactions.add(currTransaction);
                 double amount = currTransaction.amount();
-                currBalance += currTransaction.type() == TransactionType.INCOME ? amount : -amount;
+                runningBalance += currTransaction.type() == TransactionType.INCOME ? amount : -amount;
                 // since date is always updated here we just step once
                 Transaction newTransaction = nextTransactionOccurrence(currTransaction, currTransaction.date());
                 queue.add(newTransaction);
             }
         }
-        return currBalance;
+        return new DataPoint(runningBalance, transactions);
     }
 
     private Transaction nextTransactionOccurrence(Transaction currTransaction, LocalDate currDate) {
