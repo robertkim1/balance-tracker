@@ -1,6 +1,9 @@
 package com.pikel.balancetracker.balance;
 
 import com.pikel.balancetracker.balance.model.DatedBalance;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,6 +15,7 @@ import java.util.List;
 @RequestMapping("/api/balance")
 public class BalanceTrackerController {
 
+    private static final Logger logger = LoggerFactory.getLogger(BalanceTrackerController.class);
     private final BalanceTrackerService balanceTrackerService;
 
     public BalanceTrackerController(BalanceTrackerService balanceTrackerService) {
@@ -19,7 +23,13 @@ public class BalanceTrackerController {
     }
 
     @PostMapping("/submit")
-    public List<DatedBalance> submitBalanceData(@RequestBody BalanceDataRequest request) {
-        return balanceTrackerService.getBalanceSummary(request);
+    public ResponseEntity<List<DatedBalance>> submitBalanceData(@RequestBody BalanceDataRequest request) {
+        logger.info("Received balance data request with {} transactions",
+                request.transactions() != null ? request.transactions().size() : 0);
+
+        List<DatedBalance> balanceSummary = balanceTrackerService.getBalanceSummary(request);
+
+        logger.info("Successfully generated balance summary with {} data points", balanceSummary.size());
+        return ResponseEntity.ok(balanceSummary);
     }
 }
