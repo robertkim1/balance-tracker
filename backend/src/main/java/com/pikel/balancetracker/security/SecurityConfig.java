@@ -15,25 +15,19 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.Arrays;
 
 /**
- * Security Configuration with dynamic CORS based on environment.
+ * Security Configuration with manual OAuth2 flow (no automatic redirects).
+ * Backend only handles JWT validation - frontend controls all navigation.
  */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private final CustomOAuth2UserService customOAuth2UserService;
-    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    // Read allowed origins from properties file
     @Value("${cors.allowed.origins}")
     private String[] allowedOrigins;
 
-    public SecurityConfig(CustomOAuth2UserService customOAuth2UserService,
-                          OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler,
-                          JwtAuthenticationFilter jwtAuthenticationFilter) {
-        this.customOAuth2UserService = customOAuth2UserService;
-        this.oAuth2LoginSuccessHandler = oAuth2LoginSuccessHandler;
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
@@ -42,15 +36,12 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .oauth2Login(oauth2 -> oauth2
-                        .userInfoEndpoint(userInfo -> userInfo
-                                .userService(customOAuth2UserService)
-                        )
-                        .successHandler(oAuth2LoginSuccessHandler)
-                )
+                // No automatic OAuth2 login - we handle it manually via /api/auth/google
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login/**", "/oauth2/**").permitAll()
+                        // Allow authentication endpoints without JWT
+                        .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/test/**").permitAll()
+                        // All other /api/** endpoints require JWT authentication
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll()
                 )
@@ -64,15 +55,11 @@ public class SecurityConfig {
 
     /**
      * CORS configuration that uses allowed origins from properties.
-     * This way we can have different origins for dev (localhost) and prod (myapp.com).
      */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-
-        // Dynamically set allowed origins based on environment
         configuration.setAllowedOrigins(Arrays.asList(allowedOrigins));
-
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
