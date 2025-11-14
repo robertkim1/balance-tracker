@@ -1,4 +1,4 @@
-package com.pikel.balancetracker.balance.exception;
+package com.pikel.balancetracker.exception;
 
 import com.pikel.balancetracker.balance.model.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;

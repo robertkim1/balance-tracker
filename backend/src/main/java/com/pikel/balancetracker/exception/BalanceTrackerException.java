@@ -1,4 +1,4 @@
-package com.pikel.balancetracker.balance.exception;
+package com.pikel.balancetracker.exception;
 
 public class BalanceTrackerException extends RuntimeException {
     public BalanceTrackerException(String message) {

@@ -1,6 +1,6 @@
 package com.pikel.balancetracker.balance;
 
-import com.pikel.balancetracker.balance.exception.BalanceTrackerException;
+import com.pikel.balancetracker.exception.BalanceTrackerException;
 import com.pikel.balancetracker.balance.model.*;
 import com.pikel.balancetracker.utils.DateUtils;
 import org.slf4j.Logger;
@@ -24,13 +24,15 @@ public class BalanceTrackerService {
      * @return full balance summary
      */
     public List<DataPointPerDate> getBalanceSummary(BalanceDataRequest request) {
-        validateRequest(request);
+        LocalDate startDate = LocalDate.now();
+        // check all request parameters for proper input
+        validateRequest(request, startDate);
 
         try {
             // collect request parameters
-            LocalDate startDate = LocalDate.now();
+
             LocalDate endDate = startDate.plusYears(request.projectionTimeframe().getYears());
-            List<Transaction> transactions = getTransactions(request, startDate);
+            List<Transaction> transactions = request.transactions();
 
             PriorityQueue<Transaction> transactionQueue = new PriorityQueue<>(Comparator.comparing(Transaction::date));
             transactionQueue.addAll(transactions);
@@ -63,22 +65,7 @@ public class BalanceTrackerService {
         }
     }
 
-    private static List<Transaction> getTransactions(BalanceDataRequest request, LocalDate startDate) {
-        List<Transaction> transactions = request.transactions();
-
-        // Validate transaction dates
-        for (Transaction transaction : transactions) {
-            if (transaction.date() == null) {
-                throw new BalanceTrackerException("Transaction date cannot be null for: " + transaction.sourceName());
-            }
-            if (transaction.date().isBefore(startDate)) {
-                throw new BalanceTrackerException("Transaction date cannot be before start date: " + transaction.sourceName());
-            }
-        }
-        return transactions;
-    }
-
-    private void validateRequest(BalanceDataRequest request) {
+    private void validateRequest(BalanceDataRequest request, LocalDate startDate) {
         if (request == null) {
             throw new IllegalArgumentException("Request cannot be null");
         }
@@ -105,11 +92,11 @@ public class BalanceTrackerService {
 
         // Validate each transaction
         for (Transaction transaction : request.transactions()) {
-            validateTransaction(transaction);
+            validateTransaction(transaction, startDate);
         }
     }
 
-    private void validateTransaction(Transaction transaction) {
+    private void validateTransaction(Transaction transaction, LocalDate startDate) {
         if (transaction == null) {
             throw new IllegalArgumentException("Transaction cannot be null");
         }
@@ -137,13 +124,13 @@ public class BalanceTrackerService {
         if (transaction.payPeriod() == null) {
             throw new IllegalArgumentException("Transaction pay period cannot be null for: " + transaction.sourceName());
         }
+
+        if (transaction.date().isBefore(startDate)) {
+            throw new BalanceTrackerException("Transaction date cannot be before start date: " + transaction.sourceName());
+        }
     }
 
-    private DataPoint processQueue(
-            PriorityQueue<Transaction> queue,
-            LocalDate currDate,
-            double currBalance
-    ) {
+    private DataPoint processQueue(PriorityQueue<Transaction> queue, LocalDate currDate, double currBalance) {
         if (queue.isEmpty()) return null;
 
         int processedCount = 0;
