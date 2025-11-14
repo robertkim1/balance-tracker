@@ -1,7 +1,7 @@
 package com.pikel.balancetracker.security;
 
-import com.pikel.balancetracker.user.User;
-import com.pikel.balancetracker.user.UserRepository;
+import com.pikel.balancetracker.entity.User;
+import com.pikel.balancetracker.entity.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

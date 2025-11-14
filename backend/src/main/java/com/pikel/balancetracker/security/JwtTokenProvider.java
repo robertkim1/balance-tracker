@@ -1,6 +1,6 @@
 package com.pikel.balancetracker.security;
 
-import com.pikel.balancetracker.user.User;
+import com.pikel.balancetracker.entity.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.slf4j.Logger;

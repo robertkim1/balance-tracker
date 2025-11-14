@@ -1,7 +1,7 @@
 package com.pikel.balancetracker.security;
 
-import com.pikel.balancetracker.user.User;
-import com.pikel.balancetracker.user.UserRepository;
+import com.pikel.balancetracker.entity.User;
+import com.pikel.balancetracker.entity.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;

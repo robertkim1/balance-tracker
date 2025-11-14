@@ -1,8 +1,8 @@
 package com.pikel.balancetracker.balance.testing;
 
 import com.pikel.balancetracker.security.JwtTokenProvider;
-import com.pikel.balancetracker.user.User;
-import com.pikel.balancetracker.user.UserRepository;
+import com.pikel.balancetracker.entity.User;
+import com.pikel.balancetracker.entity.UserRepository;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

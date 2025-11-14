@@ -2,7 +2,7 @@ package com.pikel.balancetracker.balance;
 
 import com.pikel.balancetracker.balance.model.BalanceDataRequest;
 import com.pikel.balancetracker.balance.model.DataPointPerDate;
-import com.pikel.balancetracker.user.User;
+import com.pikel.balancetracker.entity.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;

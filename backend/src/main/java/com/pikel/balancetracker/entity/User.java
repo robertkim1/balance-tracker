@@ -1,4 +1,4 @@
-package com.pikel.balancetracker.user;
+package com.pikel.balancetracker.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
  * The googleId is the unique identifier from Google (the "sub" claim in their JWT).
  */
 @Entity
-@Table(name = "users")
+@Table(name = "User")
 @Data
 @NoArgsConstructor
 public class User {
