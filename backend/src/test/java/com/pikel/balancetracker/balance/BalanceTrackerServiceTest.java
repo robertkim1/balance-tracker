@@ -40,7 +40,8 @@ class BalanceTrackerServiceTest {
                 List.of(debt1, income1),
                 1000.0,
                 ProjectionTimeframe.ONE_YEAR,
-                SummarizeDateBy.DAY
+                SummarizeDateBy.DAY,
+                testDate
         );
 
         List<DataPointPerDate> res = balanceTrackerService.getBalanceSummary(request);

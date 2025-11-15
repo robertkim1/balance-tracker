@@ -24,7 +24,7 @@ public class BalanceTrackerService {
      * @return full balance summary
      */
     public List<DataPointPerDate> getBalanceSummary(BalanceDataRequest request) {
-        LocalDate startDate = LocalDate.now();
+        LocalDate startDate = request.startDate();
         // check all request parameters for proper input
         validateRequest(request, startDate);
 
