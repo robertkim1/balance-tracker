@@ -1,83 +1,100 @@
 package com.pikel.balancetracker.entity;
 
 import com.pikel.balancetracker.balance.model.TransactionType;
-import com.pikel.balancetracker.entity.Transaction;
+import com.pikel.balancetracker.balance.model.PayPeriod;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 /**
- * Repository for Transaction entity.
- * Provides data access methods for financial transactions.
+ * Repository interface for Transaction entity operations.
+ * Provides methods to query user-specific transactions with various filters.
  */
 @Repository
-public interface TransactionRepository extends JpaRepository<Transaction, Long> {
+public interface TransactionRepository extends JpaRepository<Transaction, UUID> {
 
     /**
      * Find all transactions for a specific user.
      *
-     * @param userId the user's ID
-     * @return list of transactions ordered by date descending
+     * @param userId the user's UUID from auth.users
+     * @return list of transactions ordered by date ascending
      */
-    List<Transaction> findByUserIdOrderByDateDesc(Long userId);
+    List<Transaction> findByUserIdOrderByDateAsc(UUID userId);
+
+    /**
+     * Find all transactions for a user by transaction type.
+     *
+     * @param userId the user's UUID
+     * @param type the transaction type (INCOME or DEBT)
+     * @return list of filtered transactions
+     */
+    List<Transaction> findByUserIdAndType(UUID userId, TransactionType type);
 
     /**
      * Find all transactions for a user within a date range.
      *
-     * @param userId the user's ID
+     * @param userId the user's UUID
      * @param startDate start of date range (inclusive)
      * @param endDate end of date range (inclusive)
-     * @return list of transactions ordered by date ascending
+     * @return list of transactions in date range
      */
     List<Transaction> findByUserIdAndDateBetweenOrderByDateAsc(
-            Long userId, LocalDate startDate, LocalDate endDate);
+            UUID userId,
+            LocalDate startDate,
+            LocalDate endDate
+    );
 
     /**
-     * Find all transactions for a user before or on a specific date.
-     * Used for balance projection calculations.
+     * Find all transactions for a user by pay period.
      *
-     * @param userId the user's ID
-     * @param endDate the cutoff date (inclusive)
-     * @return list of transactions ordered by date ascending
+     * @param userId the user's UUID
+     * @param payPeriod the pay period filter
+     * @return list of transactions with matching pay period
      */
-    List<Transaction> findByUserIdAndDateLessThanEqualOrderByDateAsc(
-            Long userId, LocalDate endDate);
+    List<Transaction> findByUserIdAndPayPeriod(UUID userId, PayPeriod payPeriod);
 
     /**
-     * Find transactions by type for a specific user.
+     * Find all transactions for a user after a specific date.
      *
-     * @param userId the user's ID
-     * @param type the transaction type (DEBT or INCOME)
-     * @return list of transactions of that type
+     * @param userId the user's UUID
+     * @param date the cutoff date
+     * @return list of transactions after the date
      */
-    List<Transaction> findByUserIdAndType(Long userId, TransactionType type);
+    List<Transaction> findByUserIdAndDateAfterOrderByDateAsc(UUID userId, LocalDate date);
 
     /**
-     * Delete all transactions for a specific user.
-     * Useful for testing or user account deletion.
+     * Find all transactions for a user before a specific date.
      *
-     * @param userId the user's ID
-     * @return number of transactions deleted
+     * @param userId the user's UUID
+     * @param date the cutoff date
+     * @return list of transactions before the date
      */
-    Long deleteByUserId(Long userId);
+    List<Transaction> findByUserIdAndDateBeforeOrderByDateAsc(UUID userId, LocalDate date);
 
     /**
      * Count total transactions for a user.
      *
-     * @param userId the user's ID
+     * @param userId the user's UUID
      * @return count of transactions
      */
-    long countByUserId(Long userId);
+    long countByUserId(UUID userId);
+
+    /**
+     * Delete all transactions for a user.
+     *
+     * @param userId the user's UUID
+     * @return number of deleted transactions
+     */
+    long deleteByUserId(UUID userId);
 
     /**
      * Check if a user has any transactions.
      *
-     * @param userId the user's ID
+     * @param userId the user's UUID
      * @return true if user has at least one transaction
      */
-    boolean existsByUserId(Long userId);
+    boolean existsByUserId(UUID userId);
 }

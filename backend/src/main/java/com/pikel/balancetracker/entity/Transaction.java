@@ -3,66 +3,87 @@ package com.pikel.balancetracker.entity;
 import com.pikel.balancetracker.balance.model.PayPeriod;
 import com.pikel.balancetracker.balance.model.TransactionType;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-
+import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.Instant;
+import java.util.UUID;
 
-/**
- * Entity representing a financial transaction (debt, income, or recurring payment).
- * Each transaction belongs to a specific user and tracks cash flow events.
- */
 @Entity
 @Table(name = "Transaction")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString
 public class Transaction {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(generator = "UUID")
+    @Column(name = "id", updatable = false, nullable = false)
+    private UUID id;
 
     /**
-     * The user who owns this transaction.
-     * Uses lazy loading for performance - user details loaded only when accessed.
+     * Foreign key reference to auth.users(id) in Supabase.
+     * This links the transaction to the authenticated user.
      */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @Column(name = "user_id", nullable = false)
+    private UUID userId;
 
     /**
-     * Human-readable source/description of the transaction.
-     * Example: "apple thru chase", "Salary - Acme Corp"
+     * Name/description of the transaction source (e.g., "apple thru chase", "Salary")
      */
-    @Column(name = "name", nullable = false, length = 500)
-    private String name;
+    @Column(name = "source_name", nullable = false, length = 255)
+    private String sourceName;
 
     /**
-     * Transaction amount in dollars.
-     * Uses BigDecimal for precise monetary calculations.
+     * Transaction amount (positive for both income and debts)
      */
-    @Column(nullable = false, precision = 15, scale = 2)
+    @Column(name = "amount", nullable = false, precision = 10, scale = 2)
     private BigDecimal amount;
 
     /**
-     * Date when this transaction occurs or is due.
+     * Date when the transaction occurs or is due
      */
-    @Column(nullable = false)
+    @Column(name = "date", nullable = false)
     private LocalDate date;
 
     /**
-     * Type of transaction: DEBT, INCOME
+     * Type of transaction: INCOME or DEBT
      */
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 50)
+    @Column(name = "type", nullable = false, length = 20)
     private TransactionType type;
 
+    /**
+     * How frequently this transaction recurs
+     */
     @Enumerated(EnumType.STRING)
-    @Column(name = "pay_period", length = 50)
+    @Column(name = "pay_period", nullable = false, length = 20)
     private PayPeriod payPeriod;
+
+    /**
+     * Timestamp when this record was created
+     */
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt;
+
+    /**
+     * Timestamp when this record was last updated
+     */
+    @Column(name = "updated_at")
+    private Instant updatedAt;
+
+    // JPA lifecycle hooks
+    @PrePersist
+    protected void onCreate() {
+        createdAt = Instant.now();
+        updatedAt = Instant.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = Instant.now();
+    }
 }
