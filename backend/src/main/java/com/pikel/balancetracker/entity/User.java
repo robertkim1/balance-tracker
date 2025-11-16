@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
  * The googleId is the unique identifier from Google (the "sub" claim in their JWT).
  */
 @Entity
-@Table(name = "User")
+@Table(name = "User_")
 @Data
 @NoArgsConstructor
 public class User {
