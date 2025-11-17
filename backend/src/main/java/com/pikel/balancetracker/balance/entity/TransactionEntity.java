@@ -1,4 +1,4 @@
-package com.pikel.balancetracker.entity;
+package com.pikel.balancetracker.balance.entity;
 
 import com.pikel.balancetracker.balance.model.PayPeriod;
 import com.pikel.balancetracker.balance.model.TransactionType;
@@ -17,7 +17,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 @ToString
-public class Transaction {
+public class TransactionEntity {
 
     @Id
     @GeneratedValue(generator = "UUID")
@@ -34,7 +34,7 @@ public class Transaction {
     /**
      * Name/description of the transaction source (e.g., "apple thru chase", "Salary")
      */
-    @Column(name = "source_name", nullable = false, length = 255)
+    @Column(name = "source_name", nullable = false)
     private String sourceName;
 
     /**
