@@ -25,8 +25,6 @@ public class BalanceTrackerService {
         this.balanceEngine = balanceEngine;
     }
 
-    // if wanted, we can separate these into two different services where one handles persistence
-    // and the other handles business logic but let's keep it here for now
     public List<TransactionEntity> getUserTransactions(UUID userId) {
         return transactionStore.findByUserId(userId);
     }
@@ -59,7 +57,6 @@ public class BalanceTrackerService {
         }
     }
 
-    // business
     public List<DataPointPerDate> getBalanceSummary(BalanceDataRequest request) {
         return balanceEngine.getBalanceSummary(request);
     }

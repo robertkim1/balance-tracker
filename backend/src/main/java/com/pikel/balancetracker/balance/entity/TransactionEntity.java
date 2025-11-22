@@ -20,7 +20,6 @@ import java.util.UUID;
 public class TransactionEntity {
 
     @Id
-    @GeneratedValue(generator = "UUID")
     @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
 
