@@ -1,5 +1,8 @@
 package com.pikel.balancetracker.balance.model;
 
+import lombok.Getter;
+
+@Getter
 public enum ProjectionTimeframe {
     ONE_YEAR(1),
     TWO_YEARS(2),
@@ -11,7 +14,4 @@ public enum ProjectionTimeframe {
         this.years = years;
     }
 
-    public int getYears() {
-        return years;
-    }
 }
