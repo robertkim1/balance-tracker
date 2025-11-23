@@ -3,6 +3,7 @@ package com.pikel.balancetracker.balance;
 import com.pikel.balancetracker.balance.model.*;
 import com.pikel.balancetracker.exception.BalanceTrackerException;
 import com.pikel.balancetracker.utils.DateUtils;
+import lombok.NoArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.PriorityQueue;
 
 @Service
+@NoArgsConstructor
 public class BalanceEngine {
 
     private static final Logger logger = LoggerFactory.getLogger(BalanceEngine.class);

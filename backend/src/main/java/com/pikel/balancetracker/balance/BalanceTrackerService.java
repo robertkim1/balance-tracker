@@ -14,7 +14,7 @@ import java.util.*;
 @Service
 public class BalanceTrackerService {
 
-    private static final Logger logger = LoggerFactory.getLogger(BalanceEngine.class);
+    private static final Logger logger = LoggerFactory.getLogger(BalanceTrackerService.class);
 
     private final TransactionStore transactionStore;
     private final BalanceEngine balanceEngine;
