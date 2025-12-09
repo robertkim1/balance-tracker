@@ -1,0 +1,96 @@
+# ============================
+# Backend (Maven / Spring Boot)
+# ============================
+
+backend/HELP.md
+backend/.mvn/wrapper/maven-wrapper.jar
+
+# Backend build artifacts
+backend/target/
+!backend/**/src/main/**/target/
+!backend/**/src/test/**/target/
+
+# env
+backend/.env
+
+# ============================
+# Frontend (JS framework)
+# ============================
+
+# dependencies
+frontend/node_modules/
+frontend/.pnp
+frontend/.pnp.*
+frontend/.yarn/*
+!frontend/.yarn/patches
+!frontend/.yarn/plugins
+!frontend/.yarn/releases
+!frontend/.yarn/versions
+
+# testing
+frontend/coverage/
+
+# next.js
+frontend/.next/
+frontend/out/
+
+# production
+frontend/build/
+
+# misc
+frontend/*.pem
+
+# debug logs
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/.pnpm-debug.log*
+
+# env files
+frontend/.env.local
+frontend/.env.development
+frontend/.env.production
+frontend/.vercel
+frontend/.tsbuildinfo
+frontend/next-env.d.ts
+
+
+# ============================
+# General (applies to whole repo)
+# ============================
+
+.DS_Store
+Thumbs.db
+
+
+# ============================
+# IDE / Tooling
+# ============================
+
+# STS
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+# IntelliJ
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# VS Code
+.vscode/
