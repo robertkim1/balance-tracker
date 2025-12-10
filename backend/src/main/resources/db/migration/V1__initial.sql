@@ -1,12 +1,12 @@
 CREATE TABLE transaction (
     id UUID PRIMARY KEY,
     user_id UUID NOT NULL,
-    source_name(255) VARCHAR NOT NULL,
+    source_name VARCHAR(255) NOT NULL,
     amount DECIMAL(10, 2) NOT NULL,
     date DATE NOT NULL,
     type VARCHAR(20) NOT NULL,
     pay_period VARCHAR(20) NOT NULL,
-    created_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP,
     CONSTRAINT fk_transaction_user
                          FOREIGN KEY (user_id)

@@ -10,7 +10,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "Transaction")
+@Table(name = "transaction")
 @Getter
 @Setter
 @NoArgsConstructor
