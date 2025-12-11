@@ -5,12 +5,13 @@ import { supabase } from "../lib/supabase";
 
 export default function Home() {
   const { jwt } = useAuth();
+  console.log("JWT in Home:", jwt);
 
   const signInWithGoogle = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: process.env.BACKEND_API_URL_DEV + "/auth/callback"
+        redirectTo: process.env.FRONTEND_URL_DEV + "/auth/callback"
       }
     });
 

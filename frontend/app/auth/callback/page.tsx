@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 
 export default function CallbackPage() {
   const { setJwt } = useAuth();
+  const router = useRouter();
   useEffect(() => {
     const processSession = async () => {
       const {
@@ -21,13 +22,11 @@ export default function CallbackPage() {
       const jwt = session.access_token;
       console.log("Received Supabase JWT:", jwt);
       setJwt(jwt);
+      router.replace("/");
     };
 
     processSession();
-  }, [setJwt]);
-
-  const router = useRouter();
-  router.replace("/");
+  }, [setJwt, router]);
 
   return (
     <main className="flex h-screen items-center justify-center">
