@@ -1,33 +1,23 @@
 "use client";
 
 import { useAuth } from "../lib/auth-context";
-import { supabase } from "../lib/supabase";
 
 export default function Home() {
-  const { jwt } = useAuth();
-  console.log("JWT in Home:", jwt);
+  const { jwt, signInWithGoogle, signOut, isLoading } = useAuth();
 
-  const signInWithGoogle = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: process.env.FRONTEND_URL_DEV + "/auth/callback"
-      }
-    });
-
-    if (error) {
-      console.log("Error:", error);
-      return;
-    }
-
-    console.log("Redirecting…");
-  };
+  if (isLoading) {
+    return (
+      <main className="flex h-screen items-center justify-center">
+        <p>Loading...</p>
+      </main>
+    );
+  }
 
   if (!jwt) {
     return (
       <main className="flex h-screen items-center justify-center">
         <button
-          className="px-6 py-3 rounded-md bg-blue-600 text-white text-lg"
+          className="px-6 py-3 rounded-md bg-blue-600 text-white text-lg hover:bg-blue-700 transition-colors"
           onClick={signInWithGoogle}
         >
           Sign in with Google
@@ -38,7 +28,15 @@ export default function Home() {
 
   return (
     <main className="flex h-screen items-center justify-center">
-      <p>Welcome! Your JWT is now loaded.</p>
+      <div className="text-center space-y-4">
+        <p className="text-lg">Welcome! Your JWT is now loaded.</p>
+        <button
+          className="px-6 py-3 rounded-md bg-blue-600 text-white text-lg hover:bg-blue-700 transition-colors"
+          onClick={signOut}
+        >
+          Sign Out
+        </button>
+      </div>
     </main>
   );
 }

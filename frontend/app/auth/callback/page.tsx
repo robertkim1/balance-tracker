@@ -1,32 +1,19 @@
 "use client";
 
 import { useEffect } from "react";
-import { supabase } from "../../../lib/supabase";
-import { useAuth } from "../../../lib/auth-context";
 import { useRouter } from "next/navigation";
+import { useAuth } from "../../../lib/auth-context";
 
 export default function CallbackPage() {
-  const { setJwt } = useAuth();
+  const { isLoading } = useAuth();
   const router = useRouter();
+
   useEffect(() => {
-    const processSession = async () => {
-      const {
-        data: { session }
-      } = await supabase.auth.getSession();
-
-      if (!session) {
-        console.log("Session not found");
-        return;
-      }
-
-      const jwt = session.access_token;
-      console.log("Received Supabase JWT:", jwt);
-      setJwt(jwt);
+    if (!isLoading) {
+      // Auth state is handled by the context, just redirect
       router.replace("/");
-    };
-
-    processSession();
-  }, [setJwt, router]);
+    }
+  }, [isLoading, router]);
 
   return (
     <main className="flex h-screen items-center justify-center">
