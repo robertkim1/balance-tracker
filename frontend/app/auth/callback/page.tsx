@@ -1,23 +1,27 @@
 "use client";
-
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "../../../lib/auth-context";
+import { supabase } from "../../../lib/supabase";
 
 export default function CallbackPage() {
-  const { isLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading) {
-      // Auth state is handled by the context, just redirect
-      router.replace("/");
-    }
-  }, [isLoading, router]);
+    const handleAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.access_token) {
+        // Send token to Next.js API to set HttpOnly cookie
+        await fetch("/api/auth/set-cookie", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token: session.access_token })
+        });
+      }
+      router.replace("/"); // redirect to home
+    };
 
-  return (
-    <main className="flex h-screen items-center justify-center">
-      <p>Signing you in…</p>
-    </main>
-  );
+    handleAuth();
+  }, [router]);
+
+  return <p>Signing you in…</p>;
 }
