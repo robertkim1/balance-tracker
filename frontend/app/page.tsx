@@ -3,7 +3,12 @@
 import { useAuth } from "../lib/auth-context";
 
 export default function Home() {
-  const { jwt, signInWithGoogle, signOut, isLoading } = useAuth();
+  const {
+    isAuthenticated,
+    isLoading,
+    signInWithGoogle,
+    signOut
+  } = useAuth();
 
   if (isLoading) {
     return (
@@ -13,7 +18,7 @@ export default function Home() {
     );
   }
 
-  if (!jwt) {
+  if (!isAuthenticated) {
     return (
       <main className="flex h-screen items-center justify-center">
         <button
@@ -29,7 +34,7 @@ export default function Home() {
   return (
     <main className="flex h-screen items-center justify-center">
       <div className="text-center space-y-4">
-        <p className="text-lg">Welcome! Your JWT is now loaded.</p>
+        <p className="text-lg">Welcome! You are signed in.</p>
         <button
           className="px-6 py-3 rounded-md bg-blue-600 text-white text-lg hover:bg-blue-700 transition-colors"
           onClick={signOut}

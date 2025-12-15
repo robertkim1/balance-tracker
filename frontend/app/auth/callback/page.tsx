@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../../lib/supabase";
@@ -7,21 +8,25 @@ export default function CallbackPage() {
   const router = useRouter();
 
   useEffect(() => {
-    const handleAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.access_token) {
-        // Send token to Next.js API to set HttpOnly cookie
+    const run = async () => {
+      const { data } = await supabase.auth.getSession();
+      const token = data.session?.access_token;
+
+      if (token) {
         await fetch("/api/auth/set-cookie", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ token: session.access_token })
+          credentials: "include",
+          body: JSON.stringify({ token })
         });
       }
-      router.replace("/"); // redirect to home
+
+      // Full reload ensures AuthProvider reads the cookie correctly
+      window.location.href = "/";
     };
 
-    handleAuth();
-  }, [router]);
+    run();
+  }, []);
 
   return <p>Signing you in…</p>;
 }

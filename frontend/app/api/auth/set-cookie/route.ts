@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
     name: "jwt",
     value: token,
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: false,
     sameSite: "lax",
     path: "/",
     maxAge: 60 * 60, // 1 hour
