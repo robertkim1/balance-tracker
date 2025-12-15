@@ -1,18 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
-export async function POST(req: NextRequest) {
-  const jwt = req.cookies.get("jwt")?.value;
-
-  if (jwt) {
-    await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/logout`, {
-      method: "POST",
-      headers: {
-        apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        Authorization: `Bearer ${jwt}`
-      }
-    });
-  }
-
+export async function POST() {
   const res = NextResponse.json({ ok: true });
 
   res.cookies.set({
@@ -27,3 +15,4 @@ export async function POST(req: NextRequest) {
 
   return res;
 }
+

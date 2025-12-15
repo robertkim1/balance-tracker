@@ -22,6 +22,6 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     storage: new NoStorage(),        // prevents localStorage usage
     persistSession: false,           // no client-side persistence
     autoRefreshToken: false,         // server handles refresh
-    detectSessionInUrl: false,       // no URL token auto-detection
+    detectSessionInUrl: true,      
   }
 });

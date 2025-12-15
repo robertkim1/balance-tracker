@@ -30,7 +30,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const res = await fetch("/api/auth/me", {
         credentials: "include"
       });
-      setIsAuthenticated(res.ok);
+      setIsAuthenticated(res.status === 200);
     } finally {
       setIsLoading(false);
     }
