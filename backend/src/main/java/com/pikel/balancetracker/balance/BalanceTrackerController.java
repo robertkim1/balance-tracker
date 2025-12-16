@@ -3,6 +3,7 @@ package com.pikel.balancetracker.balance;
 import com.pikel.balancetracker.balance.model.BalanceDataRequest;
 import com.pikel.balancetracker.balance.model.DataPointPerDate;
 import com.pikel.balancetracker.balance.entity.TransactionEntity;
+import com.pikel.balancetracker.balance.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,13 @@ public class BalanceTrackerController {
 
     public BalanceTrackerController(BalanceTrackerService balanceTrackerService) {
         this.balanceTrackerService = balanceTrackerService;
+    }
+
+    @GetMapping("/userdata")
+    public ResponseEntity<User> getUserData(@AuthenticationPrincipal Jwt jwt) {
+        UUID userId = UUID.fromString(jwt.getSubject());
+        String userEmail = jwt.getClaimAsString("email");
+        return ResponseEntity.ok(new User(userId, userEmail));
     }
 
     /**

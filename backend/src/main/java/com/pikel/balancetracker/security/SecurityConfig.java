@@ -15,14 +15,12 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import javax.crypto.spec.SecretKeySpec;
 import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-
-    @Value("${supabase.url}")
-    private String supabaseUrl;
 
     @Value("${cors.allowed.origins}")
     private String[] allowedOrigins;
@@ -56,9 +54,9 @@ public class SecurityConfig {
      */
     @Bean
     public JwtDecoder jwtDecoder() {
-        // RFC standard .well-known path for JWKS
-        String jwksUri = supabaseUrl + "/auth/v1/.well-known/jwks.json";
-        return NimbusJwtDecoder.withJwkSetUri(jwksUri).build();
+        byte[] secretBytes = new byte[16];
+        SecretKeySpec key = new SecretKeySpec(secretBytes, "HmacSHA256");
+        return NimbusJwtDecoder.withSecretKey(key).build();
     }
 
     @Bean

@@ -45,7 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       provider: "google",
       options: {
         redirectTo:
-          process.env.NEXT_PUBLIC_FRONTEND_URL_DEV + "/auth/callback"
+          process.env.NEXT_PUBLIC_FRONTEND_URL + "/auth/callback"
       }
     });
   };

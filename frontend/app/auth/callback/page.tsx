@@ -8,6 +8,12 @@ export default function CallbackPage() {
     const run = async () => {
       const { data, error } = await supabase.auth.getSession();
 
+      if (error) {
+        console.error("OAuth callback error:", error);
+        window.location.replace("/");
+        return;
+      }
+
       const token = data?.session?.access_token;
 
       if (token) {
