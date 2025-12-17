@@ -33,18 +33,16 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/test/**").permitAll()
-                        .requestMatchers("/api/balance/userdata").authenticated()
-                        .anyRequest().permitAll()
-                )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/test/**").permitAll()
+                        .requestMatchers("/api/balance/**").authenticated()
+                        .anyRequest().permitAll()
+                )
                 .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(jwt -> jwt
-                                .decoder(jwtDecoder())
-                        )
+                        .jwt(jwt -> jwt.decoder(jwtDecoder()))
                 );
 
         return http.build();
@@ -52,8 +50,8 @@ public class SecurityConfig {
 
     @Bean
     public JwtDecoder jwtDecoder() {
-        byte[] secretBytes = backendJwtSecret.getBytes(StandardCharsets.UTF_8);
-        SecretKeySpec key = new SecretKeySpec(secretBytes, "HmacSHA256");
+        byte[] keyBytes = backendJwtSecret.getBytes(StandardCharsets.UTF_8);
+        SecretKeySpec key = new SecretKeySpec(keyBytes, "HmacSHA256");
         return NimbusJwtDecoder.withSecretKey(key).build();
     }
 
