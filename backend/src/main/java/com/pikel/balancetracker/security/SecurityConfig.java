@@ -10,12 +10,12 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 @Configuration
@@ -25,15 +25,17 @@ public class SecurityConfig {
     @Value("${cors.allowed.origins}")
     private String[] allowedOrigins;
 
+    @Value("${backend.jwt.secret}")
+    private String backendJwtSecret;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.addFilterBefore(new JWTCookieFilter(jwtDecoder()), UsernamePasswordAuthenticationFilter.class);
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/test/**").permitAll()
-                        .requestMatchers("/api/**").authenticated()
+                        .requestMatchers("/api/balance/userdata").authenticated()
                         .anyRequest().permitAll()
                 )
                 .sessionManagement(session -> session
@@ -48,13 +50,9 @@ public class SecurityConfig {
         return http.build();
     }
 
-    /**
-     * JWT Decoder that validates tokens from Supabase.
-     * Uses Supabase's public JWKS endpoint (RFC 8615 standard path).
-     */
     @Bean
     public JwtDecoder jwtDecoder() {
-        byte[] secretBytes = new byte[16];
+        byte[] secretBytes = backendJwtSecret.getBytes(StandardCharsets.UTF_8);
         SecretKeySpec key = new SecretKeySpec(secretBytes, "HmacSHA256");
         return NimbusJwtDecoder.withSecretKey(key).build();
     }

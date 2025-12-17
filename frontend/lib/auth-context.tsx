@@ -1,71 +1,38 @@
 "use client";
 
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  ReactNode
-} from "react";
-
-import { supabase } from "./supabase";
+import { createContext, useContext, ReactNode } from "react";
+import { authClient } from "./auth-client";
 
 type AuthContextType = {
   isAuthenticated: boolean;
   isLoading: boolean;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
-  refreshAuth: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const refreshAuth = async () => {
-    setIsLoading(true);
-    try {
-      const res = await fetch("/api/auth/me", {
-        credentials: "include"
-      });
-      setIsAuthenticated(res.status === 200);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    refreshAuth();
-  }, []);
+  const { data: session, isPending } = authClient.useSession();
 
   const signInWithGoogle = async () => {
-    await supabase.auth.signInWithOAuth({
+    await authClient.signIn.social({
       provider: "google",
-      options: {
-        redirectTo:
-          process.env.NEXT_PUBLIC_FRONTEND_URL + "/auth/callback"
-      }
+      callbackURL: "/" // frontend page after successful login
     });
   };
 
   const signOut = async () => {
-    await fetch("/api/auth/logout", {
-      method: "POST",
-      credentials: "include"
-    });
-    await refreshAuth();
+    await authClient.signOut();
   };
 
   return (
     <AuthContext.Provider
       value={{
-        isAuthenticated,
-        isLoading,
+        isAuthenticated: !!session,
+        isLoading: isPending,
         signInWithGoogle,
         signOut,
-        refreshAuth
       }}
     >
       {children}
@@ -75,8 +42,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth() {
   const ctx = useContext(AuthContext);
-  if (!ctx) {
-    throw new Error("useAuth must be used inside AuthProvider");
-  }
+  if (!ctx) throw new Error("Missing AuthProvider");
   return ctx;
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "../lib/auth-context";
 
 type UserData = {
@@ -14,35 +14,47 @@ export default function Home() {
   const [dataLoading, setDataLoading] = useState(false);
   const [dataError, setDataError] = useState<string | null>(null);
 
+  // Fetch a fresh backend JWT from Next.js
+  const getBackendToken = useCallback(async () => {
+    const tokenRes = await fetch("/api/auth/token", { credentials: "include" });
+    if (!tokenRes.ok) throw new Error("Failed to get backend JWT");
+    const { token } = await tokenRes.json();
+    return token;
+  }, []);
+
+  // Fetch user data from Spring backend using backend JWT
+  const fetchUserData = useCallback(async () => {
+    setDataLoading(true);
+    setDataError(null);
+
+    try {
+      const token = await getBackendToken();
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/balance/userdata`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!res.ok) throw new Error(`Failed to fetch user data: ${res.status}`);
+      const data = await res.json();
+      setUserData(data);
+    } catch (err: unknown) {
+      if (err instanceof Error) setDataError(err.message);
+      else setDataError("Unknown error");
+      setUserData(null);
+    } finally {
+      setDataLoading(false);
+    }
+  }, [getBackendToken]);
+
+  // Trigger fetching whenever the user is authenticated
   useEffect(() => {
     if (!isAuthenticated) return;
-
-    const getUserData = async () => {
-      setDataLoading(true);
-      setDataError(null);
-      try {
-        const userDataAPI = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/balance/userdata`;
-        const res = await fetch(userDataAPI, { credentials: "include" });
-
-        if (!res.ok) {
-          throw new Error(`Failed to fetch user data: ${res.status}`);
-        }
-
-        const data = await res.json();
-        setUserData(data);
-      } catch (err: unknown) {
-        if (err instanceof Error) {
-          setDataError(err.message);
-        } else {
-          setDataError("Unknown error");
-        }
-      } finally {
-        setDataLoading(false);
-      }
-    };
-
-    getUserData();
-  }, [isAuthenticated]);
+    fetchUserData();
+  }, [isAuthenticated, fetchUserData]);
 
   if (isLoading) {
     return (
