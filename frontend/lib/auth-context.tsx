@@ -1,11 +1,19 @@
 "use client";
 
-import { createContext, useContext, ReactNode } from "react";
+import { createContext, useContext, useMemo, ReactNode } from "react";
 import { authClient } from "./auth-client";
+
+type User = {
+  id: string;
+  email: string;
+  name?: string;
+  image?: string;
+};
 
 type AuthContextType = {
   isAuthenticated: boolean;
   isLoading: boolean;
+  user: User | null;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
 };
@@ -26,11 +34,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await authClient.signOut();
   };
 
+  const user = useMemo<User | null>(() => {
+    if (!session) return null;
+    return {
+      id: session.user.id,
+      email: session.user.email,
+      name: session.user.name,
+      image: session.user.image ?? undefined,
+    };
+  }, [session]);
+
   return (
     <AuthContext.Provider
       value={{
         isAuthenticated: !!session,
         isLoading: isPending,
+        user: user,
         signInWithGoogle,
         signOut,
       }}

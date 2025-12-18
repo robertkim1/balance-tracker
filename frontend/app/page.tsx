@@ -3,16 +3,8 @@
 import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "../lib/auth-context";
 
-type UserData = {
-  id: string;
-  email: string;
-};
-
 export default function Home() {
-  const { isAuthenticated, isLoading, signInWithGoogle, signOut } = useAuth();
-  const [userData, setUserData] = useState<UserData | null>(null);
-  const [dataLoading, setDataLoading] = useState(false);
-  const [dataError, setDataError] = useState<string | null>(null);
+  const { isAuthenticated, isLoading, user, signInWithGoogle, signOut } = useAuth();
 
   // Fetch a fresh backend JWT from Next.js
   const getBackendToken = useCallback(async () => {
@@ -23,38 +15,41 @@ export default function Home() {
   }, []);
 
   // Fetch user data from Spring backend using backend JWT
-  const fetchUserData = useCallback(async () => {
-    setDataLoading(true);
-    setDataError(null);
+  // technically don't need to this to fetch data
+  // since the user stuff comes from our current session object
+  // replace this with an actual call
+  // const fetchUserData = useCallback(async () => {
+  //   setDataLoading(true);
+  //   setDataError(null);
 
-    try {
-      const token = await getBackendToken();
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/balance/userdata`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+  //   try {
+  //     const token = await getBackendToken();
+  //     const res = await fetch(
+  //       `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/balance/userdata`,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     );
 
-      if (!res.ok) throw new Error(`Failed to fetch user data: ${res.status}`);
-      const data = await res.json();
-      setUserData(data);
-    } catch (err: unknown) {
-      if (err instanceof Error) setDataError(err.message);
-      else setDataError("Unknown error");
-      setUserData(null);
-    } finally {
-      setDataLoading(false);
-    }
-  }, [getBackendToken]);
+  //     if (!res.ok) throw new Error(`Failed to fetch user data: ${res.status}`);
+  //     const data = await res.json();
+  //     setUserData(data);
+  //   } catch (err: unknown) {
+  //     if (err instanceof Error) setDataError(err.message);
+  //     else setDataError("Unknown error");
+  //     setUserData(null);
+  //   } finally {
+  //     setDataLoading(false);
+  //   }
+  // }, [getBackendToken]);
 
   // Trigger fetching whenever the user is authenticated
-  useEffect(() => {
-    if (!isAuthenticated) return;
-    fetchUserData();
-  }, [isAuthenticated, fetchUserData]);
+  // useEffect(() => {
+  //   if (!isAuthenticated) return;
+  //   fetchUserData();
+  // }, [isAuthenticated, fetchUserData]);
 
   if (isLoading) {
     return (
@@ -81,16 +76,10 @@ export default function Home() {
     <main className="flex h-screen items-center justify-center">
       <div className="text-center space-y-4">
         <p className="text-lg">Welcome! You are signed in.</p>
-
-        {dataLoading && <p>Loading user data...</p>}
-        {dataError && <p className="text-red-500">{dataError}</p>}
-        {userData && (
-          <div className="space-y-2">
-            <p>Username: {userData.id}</p>
-            <p>Email: {userData.email}</p>
-          </div>
-        )}
-
+        <div className="space-y-2">
+          <p>Better Auth User Id: {user?.id}</p>
+          <p>Email: {user?.email}</p>
+        </div>
         <button
           className="px-6 py-3 rounded-md bg-blue-600 text-white text-lg hover:bg-blue-700 transition-colors"
           onClick={signOut}
