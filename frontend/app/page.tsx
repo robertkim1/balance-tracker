@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "../lib/auth-context";
 
 type UserData = {
-  username: string;
+  id: string;
   email: string;
 };
 
@@ -86,7 +86,7 @@ export default function Home() {
         {dataError && <p className="text-red-500">{dataError}</p>}
         {userData && (
           <div className="space-y-2">
-            <p>Username: {userData.username}</p>
+            <p>Username: {userData.id}</p>
             <p>Email: {userData.email}</p>
           </div>
         )}
