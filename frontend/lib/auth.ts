@@ -18,3 +18,11 @@ export const auth = betterAuth({
     },
   },
 });
+
+// new Pool({
+//   connectionString: process.env.DATABASE_URL,
+//   options: "-c search_path=auth"
+// });
+// PGOPTIONS="-c search_path=auth"
+
+// try this later
