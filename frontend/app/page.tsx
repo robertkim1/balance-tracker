@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useAuth } from "../lib/auth-context";
+import { useAuth } from "@/lib/auth/auth-context";
 
 export default function Home() {
   const { isAuthenticated, isLoading, user, signInWithGoogle, signOut } = useAuth();
