@@ -4,6 +4,7 @@ import { Pool } from "pg";
 export const auth = betterAuth({
   database: new Pool({
     connectionString: process.env.DATABASE_URL,
+    options: "--search_path=appauth"
   }),
   secret: process.env.BETTER_AUTH_SECRET,
   socialProviders: {
@@ -18,11 +19,3 @@ export const auth = betterAuth({
     },
   },
 });
-
-// new Pool({
-//   connectionString: process.env.DATABASE_URL,
-//   options: "-c search_path=auth"
-// });
-// PGOPTIONS="-c search_path=auth"
-
-// try this later
