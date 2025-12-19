@@ -19,3 +19,5 @@ export const auth = betterAuth({
     },
   },
 });
+
+// DATABASE_URL={connection string} npx @better-auth/cli migrate --config ./lib/auth.ts
