@@ -2,9 +2,38 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@/lib/auth/auth-context";
+import { Transaction } from "@/types/transaction";
+import { Button } from "@/components/ui/button";
+import TransactionTable from "@/components/TransactionTable";
+import TransactionModal from "@/components/TransactionModal";
 
 export default function Home() {
   const { isAuthenticated, isLoading, user, signInWithGoogle, signOut } = useAuth();
+  const [transactions, setTransactions] = useState<Transaction[]>([])
+  const [open, setOpen] = useState(false)
+  const [editing, setEditing] = useState<Transaction | null>(null)
+
+  function save(tx: Transaction) {
+    setTransactions(prev => {
+      const idx = prev.findIndex(t => t.id === tx.id)
+      if (idx !== -1) {
+        const copy = [...prev]
+        copy[idx] = tx
+        return copy
+      }
+      return [...prev, tx]
+    })
+    setEditing(null)
+    setOpen(false)
+  }
+
+  function submitAll() {
+    fetch("/api/submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(transactions)
+    })
+  }
 
   // Fetch a fresh backend JWT from Next.js
   const getBackendToken = useCallback(async () => {
@@ -62,19 +91,16 @@ export default function Home() {
   if (!isAuthenticated) {
     return (
       <main className="flex h-screen items-center justify-center">
-        <button
-          className="px-6 py-3 rounded-md bg-blue-600 text-white text-lg hover:bg-blue-700 transition-colors"
-          onClick={signInWithGoogle}
-        >
-          Sign in with Google
-        </button>
+        <Button onClick={signInWithGoogle}>
+            Sign in with Google
+          </Button>
       </main>
     );
   }
 
   return (
-    <main className="flex h-screen items-center justify-center">
-      <div className="text-center space-y-4">
+    <main className="flex justify-center mt-12">
+      {/* <div className="text-center space-y-4">
         <p className="text-lg">Welcome! You are signed in.</p>
         <div className="space-y-2">
           <p>Better Auth User Id: {user?.id}</p>
@@ -86,7 +112,36 @@ export default function Home() {
         >
           Sign Out
         </button>
+      </div> */}
+      <div className="w-[70%] space-y-4">
+        <div className="flex gap-2">
+          <Button onClick={() => setOpen(true)}>Add Transaction</Button>
+          <Button variant="secondary" onClick={submitAll}>
+            Submit All
+          </Button>
+          <Button variant="secondary" onClick={signOut}>
+            Sign Out
+          </Button>
+        </div>
+
+        <TransactionTable
+          transactions={transactions}
+          onEdit={tx => {
+            setEditing(tx)
+            setOpen(true)
+          }}
+          onDelete={id =>
+            setTransactions(prev => prev.filter(t => t.id !== id))
+          }
+        />
+
+        <TransactionModal
+          open={open}
+          onOpenChange={setOpen}
+          initialData={editing}
+          onSave={save}
+        />
       </div>
     </main>
-  );
+  )
 }

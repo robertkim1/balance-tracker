@@ -1,4 +1,13 @@
-import { Transaction } from "@/types/transaction";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from "@/components/ui/table"
+import { Button } from "@/components/ui/button"
+import { Transaction } from "@/types/transaction"
 
 interface Props {
   transactions: Transaction[]
@@ -8,32 +17,41 @@ interface Props {
 
 export default function TransactionTable({ transactions, onEdit, onDelete }: Props) {
   return (
-    <table style={{ width: "100%", borderCollapse: "collapse" }}>
-      <thead>
-        <tr>
-          <th>Source</th>
-          <th>Amount</th>
-          <th>Date</th>
-          <th>Type</th>
-          <th>Pay Period</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Source</TableHead>
+          <TableHead>Amount</TableHead>
+          <TableHead>Date</TableHead>
+          <TableHead>Type</TableHead>
+          <TableHead>Pay Period</TableHead>
+          <TableHead />
+        </TableRow>
+      </TableHeader>
+
+      <TableBody>
         {transactions.map(tx => (
-          <tr key={tx.id}>
-            <td>{tx.sourceName}</td>
-            <td>{tx.amount}</td>
-            <td>{tx.date}</td>
-            <td>{tx.type}</td>
-            <td>{tx.payPeriod}</td>
-            <td>
-              <button onClick={() => onEdit(tx)}>Edit</button>
-              <button onClick={() => onDelete(tx.id)}>Delete</button>
-            </td>
-          </tr>
+          <TableRow key={tx.id}>
+            <TableCell>{tx.sourceName}</TableCell>
+            <TableCell>{tx.amount}</TableCell>
+            <TableCell>{tx.date}</TableCell>
+            <TableCell>{tx.type}</TableCell>
+            <TableCell>{tx.payPeriod}</TableCell>
+            <TableCell className="flex gap-2">
+              <Button size="sm" onClick={() => onEdit(tx)}>
+                Edit
+              </Button>
+              <Button
+                size="sm"
+                variant="destructive"
+                onClick={() => onDelete(tx.id)}
+              >
+                Delete
+              </Button>
+            </TableCell>
+          </TableRow>
         ))}
-      </tbody>
-    </table>
-  );
+      </TableBody>
+    </Table>
+  )
 }

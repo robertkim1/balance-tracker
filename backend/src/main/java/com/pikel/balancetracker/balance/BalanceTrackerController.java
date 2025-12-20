@@ -25,12 +25,12 @@ public class BalanceTrackerController {
         this.balanceTrackerService = balanceTrackerService;
     }
 
-    @GetMapping("/userdata")
-    public ResponseEntity<User> getUserData(@AuthenticationPrincipal Jwt jwt) {
-        UUID userId = UUID.fromString(jwt.getSubject());
-        String userEmail = jwt.getClaimAsString("email");
-        return ResponseEntity.ok(new User(userId, userEmail));
-    }
+//    @GetMapping("/userdata")
+//    public ResponseEntity<User> getUserData(@AuthenticationPrincipal Jwt jwt) {
+//        UUID userId = UUID.fromString(jwt.getSubject());
+//        String userEmail = jwt.getClaimAsString("email");
+//        return ResponseEntity.ok(new User(userId, userEmail));
+//    }
 
     /**
      * GET endpoint - Fetch user's existing transactions
