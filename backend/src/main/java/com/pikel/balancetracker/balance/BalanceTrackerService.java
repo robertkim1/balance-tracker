@@ -30,30 +30,22 @@ public class BalanceTrackerService {
     }
 
     @Transactional
-    public void saveUserTransactions(UUID userId, List<Transaction> transactions) {
+    public TransactionEntity saveUserTransaction(UUID userId, Transaction transaction) {
         try {
-            // Delete all existing transactions for this user
-            transactionStore.deleteByUserId(userId);
-            logger.info("Deleted existing transactions for user: {}", userId);
-
-            // Convert and save new transactions
-            List<TransactionEntity> entities = transactions.stream()
-                    .map(t -> TransactionEntity.builder()
-                            .userId(userId)
-                            .sourceName(t.sourceName())
-                            .amount(BigDecimal.valueOf(t.amount()))
-                            .date(t.date())
-                            .type(t.type())
-                            .payPeriod(t.payPeriod())
-                            .build())
-                    .toList();
-
-            transactionStore.saveAll(entities);
-            logger.info("Saved {} new transactions for user: {}", entities.size(), userId);
-
+            TransactionEntity transactionEntity = TransactionEntity.builder()
+                    .userId(userId)
+                    .sourceName(transaction.sourceName())
+                    .amount(BigDecimal.valueOf(transaction.amount()))
+                    .date(transaction.date())
+                    .type(transaction.type())
+                    .payPeriod(transaction.payPeriod())
+                    .build();
+            transactionStore.save(transactionEntity);
+            logger.info("Saved transaction {}", transactionEntity);
+            return transactionEntity;
         } catch (Exception e) {
-            logger.error("Failed to save transactions for user: {}", userId, e);
-            throw new BalanceTrackerException("Failed to save transactions: " + e.getMessage(), e);
+            logger.error(e.getMessage(), e);
+            throw new BalanceTrackerException("Failed to save transaction: " + e.getMessage(), e);
         }
     }
 

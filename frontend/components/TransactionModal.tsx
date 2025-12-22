@@ -42,7 +42,6 @@ export default function TransactionModal({
 
   function submit() {
     onSave({
-      id: initialData?.id ?? crypto.randomUUID(),
       sourceName: form.sourceName,
       amount: Number(form.amount),
       date: form.date,

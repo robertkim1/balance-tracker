@@ -24,8 +24,10 @@ public class TransactionStore {
         repo.deleteByUserId(userId);
     }
 
-    public void saveAll(List<TransactionEntity> entities) {
-        repo.saveAll(entities);
+    public void save(TransactionEntity entity) {
+        repo.save(entity);
     }
+
+
 }
 

@@ -1,11 +1,14 @@
 
 export type Transaction = {
-    id: string;
     sourceName: string;
     amount: number;
     date: string;
     type: TransactionType; 
     payPeriod: PayPeriod;
+};
+
+export type TransactionEntity = Transaction &  {
+    id: string;
 };
 
 export enum TransactionType {

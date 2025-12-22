@@ -3,6 +3,7 @@ package com.pikel.balancetracker.balance;
 import com.pikel.balancetracker.balance.model.BalanceDataRequest;
 import com.pikel.balancetracker.balance.model.DataPointPerDate;
 import com.pikel.balancetracker.balance.entity.TransactionEntity;
+import com.pikel.balancetracker.balance.model.Transaction;
 import com.pikel.balancetracker.balance.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +11,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
@@ -40,14 +43,36 @@ public class BalanceTrackerController {
             @AuthenticationPrincipal Jwt jwt) {
 
         UUID userId = UUID.fromString(jwt.getSubject());
-        String userEmail = jwt.getClaimAsString("email");
 
-        logger.info("Fetching transactions for user: {} (ID: {})", userEmail, userId);
+        logger.info("Fetching transactions for userid: {}", userId);
 
         List<TransactionEntity> transactions = balanceTrackerService.getUserTransactions(userId);
 
-        logger.info("Found {} transactions for user: {}", transactions.size(), userEmail);
+        logger.info("Found {} transactions for user: {}", transactions.size(), userId);
         return ResponseEntity.ok(transactions);
+    }
+
+    @PostMapping("/transactions")
+    public ResponseEntity<TransactionEntity> createUserTransaction(@RequestBody Transaction transaction,
+                                                                   @AuthenticationPrincipal Jwt jwt) {
+        UUID userId = UUID.fromString(jwt.getSubject());
+        TransactionEntity saved = balanceTrackerService.saveUserTransaction(userId, transaction);
+        logger.info("Created transaction for userid: {}", userId);
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest()      // /api/transactions
+                .path("/{id}")             // /api/transactions/{id}
+                .buildAndExpand(saved.getId())
+                .toUri();
+        return ResponseEntity.created(location).body(saved);
+    }
+
+    // update endpoint
+    @PutMapping("/transactions/{id}")
+    public ResponseEntity<TransactionEntity> updateUserTransaction(@PathVariable String transactionId,
+                                                                   @RequestBody Transaction transaction,
+                                                                   @AuthenticationPrincipal Jwt jwt) {
+
+
     }
 
     /**

@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { useAuth } from "@/lib/auth/auth-context";
-import { Transaction } from "@/types/transaction";
+import { Transaction, TransactionEntity } from "@/types/transaction";
 import { Button } from "@/components/ui/button";
 import TransactionTable from "@/components/TransactionTable";
 import TransactionModal from "@/components/TransactionModal";
@@ -16,7 +16,14 @@ export default function Home() {
   const { isAuthenticated, isLoading, signInWithGoogle, signOut } = useAuth();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Transaction | null>(null);
+  const [modalKeyCounter, setModalKeyCounter] = useState(0);
   const queryClient = useQueryClient();
+
+  function openModal(tx?: TransactionEntity) {
+    setEditing(tx ?? null);
+    if (!tx) setModalKeyCounter(prev => prev + 1);
+    setOpen(true);
+  }
 
   const getBackendToken = useCallback(async () => {
     const res = await fetch("/api/auth/token", { credentials: "include" });
@@ -137,7 +144,7 @@ export default function Home() {
         />
 
         <TransactionModal
-          key={editing?.id ?? "new"}
+          key={editing?.id ?? `new-${modalKeyCounter}`}
           open={open}
           onOpenChange={setOpen}
           initialData={editing}
