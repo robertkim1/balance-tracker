@@ -5,9 +5,9 @@ import {
   TableHead,
   TableHeader,
   TableRow
-} from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
-import { Transaction } from "@/types/transaction"
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Transaction } from "@/types/transaction";
 
 interface Props {
   transactions: Transaction[]
@@ -53,5 +53,5 @@ export default function TransactionTable({ transactions, onEdit, onDelete }: Pro
         ))}
       </TableBody>
     </Table>
-  )
+  );
 }

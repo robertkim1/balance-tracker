@@ -1,22 +1,22 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue
-} from "@/components/ui/select"
-import { Transaction, TransactionType, PayPeriod } from "@/types/transaction"
+} from "@/components/ui/select";
+import { Transaction, TransactionType, PayPeriod } from "@/types/transaction";
 
 interface Props {
   open: boolean
@@ -31,38 +31,26 @@ export default function TransactionModal({
   initialData,
   onSave
 }: Props) {
-  const [sourceName, setSourceName] = useState("")
-  const [amount, setAmount] = useState("")
-  const [date, setDate] = useState("")
-  const [type, setType] = useState<TransactionType>(TransactionType.INCOME);
-  const [payPeriod, setPayPeriod] = useState<PayPeriod>(PayPeriod.WEEKLY);
 
-  useEffect(() => {
-    if (initialData) {
-      setSourceName(initialData.sourceName)
-      setAmount(String(initialData.amount))
-      setDate(initialData.date)
-      setType(initialData.type)
-      setPayPeriod(initialData.payPeriod)
-    } else {
-      setSourceName("")
-      setAmount("")
-      setDate("")
-      setType(TransactionType.INCOME)
-      setPayPeriod(PayPeriod.WEEKLY)
-    }
-  }, [initialData, open])
+  const [form, setForm] = useState({
+    sourceName: initialData?.sourceName ?? "",
+    amount: initialData?.amount ? String(initialData.amount) : "",
+    date: initialData?.date ?? "",
+    type: initialData?.type ?? TransactionType.INCOME,
+    payPeriod: initialData?.payPeriod ?? PayPeriod.WEEKLY,
+  });
 
   function submit() {
     onSave({
       id: initialData?.id ?? crypto.randomUUID(),
-      sourceName,
-      amount: Number(amount),
-      date,
-      type,
-      payPeriod
-    })
+      sourceName: form.sourceName,
+      amount: Number(form.amount),
+      date: form.date,
+      type: form.type,
+      payPeriod: form.payPeriod
+    });
   }
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -76,24 +64,24 @@ export default function TransactionModal({
         <div className="space-y-3">
           <Input
             placeholder="Source name"
-            value={sourceName}
-            onChange={e => setSourceName(e.target.value)}
+            value={form.sourceName}
+            onChange={e => setForm(f => ({ ...f, sourceName: e.target.value }))}
           />
 
           <Input
             type="number"
             placeholder="Amount"
-            value={amount}
-            onChange={e => setAmount(e.target.value)}
+            value={form.amount}
+            onChange={e => setForm(f => ({ ...f, amount: e.target.value }))}
           />
 
           <Input
             type="date"
-            value={date}
-            onChange={e => setDate(e.target.value)}
+            value={form.date}
+            onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
           />
 
-          <Select value={type} onValueChange={v => setType(v as TransactionType)}>
+          <Select value={form.type} onValueChange={v => setForm(f => ({ ...f, type: v as TransactionType }))}>
             <SelectTrigger>
               <SelectValue placeholder="Type" />
             </SelectTrigger>
@@ -104,8 +92,8 @@ export default function TransactionModal({
           </Select>
 
           <Select
-            value={payPeriod}
-            onValueChange={v => setPayPeriod(v as PayPeriod)}
+            value={form.payPeriod}
+            onValueChange={v => setForm(f => ({ ...f, payPeriod: v as PayPeriod }))}
           >
             <SelectTrigger>
               <SelectValue placeholder="Pay period" />
@@ -123,5 +111,5 @@ export default function TransactionModal({
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

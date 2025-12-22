@@ -1,84 +1,100 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { useAuth } from "@/lib/auth/auth-context";
 import { Transaction } from "@/types/transaction";
 import { Button } from "@/components/ui/button";
 import TransactionTable from "@/components/TransactionTable";
 import TransactionModal from "@/components/TransactionModal";
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 
 export default function Home() {
-  const { isAuthenticated, isLoading, user, signInWithGoogle, signOut } = useAuth();
-  const [transactions, setTransactions] = useState<Transaction[]>([])
-  const [open, setOpen] = useState(false)
-  const [editing, setEditing] = useState<Transaction | null>(null)
+  const { isAuthenticated, isLoading, signInWithGoogle, signOut } = useAuth();
+  const [open, setOpen] = useState(false);
+  const [editing, setEditing] = useState<Transaction | null>(null);
+  const queryClient = useQueryClient();
 
-  function save(tx: Transaction) {
-    setTransactions(prev => {
-      const idx = prev.findIndex(t => t.id === tx.id)
-      if (idx !== -1) {
-        const copy = [...prev]
-        copy[idx] = tx
-        return copy
+  const getBackendToken = useCallback(async () => {
+    const res = await fetch("/api/auth/token", { credentials: "include" });
+    if (!res.ok) throw new Error("Failed to get backend JWT");
+    const { token } = await res.json();
+    return token;
+  }, []);
+
+  const fetchTransactions = async (): Promise<Transaction[]> => {
+    const token = await getBackendToken();
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/transactions`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
       }
-      return [...prev, tx]
-    })
-    setEditing(null)
-    setOpen(false)
-  }
+    );
+    if (!res.ok) throw new Error("Failed to load transactions");
+    return res.json();
+  };
+
+  const { data: transactions = [], isFetching } = useQuery({
+    queryKey: ["transactions"],
+    queryFn: fetchTransactions,
+    enabled: isAuthenticated,
+    staleTime: 60_000,
+  });
+
+  const saveMutation = useMutation({
+    mutationFn: async (tx: Transaction) => {
+      const token = await getBackendToken();
+      const method = tx.id ? "PUT" : "POST";
+      const url = tx.id
+        ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/transactions/${tx.id}`
+        : `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/transactions`;
+
+      const res = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(tx),
+      });
+
+      if (!res.ok) throw new Error("Save failed");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      setEditing(null);
+      setOpen(false);
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const token = await getBackendToken();
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/transactions/${id}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      if (!res.ok) throw new Error("Delete failed");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["transactions"] });
+    },
+  });
 
   function submitAll() {
     fetch("/api/submit", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(transactions)
-    })
+      body: JSON.stringify(transactions),
+    });
   }
-
-  // Fetch a fresh backend JWT from Next.js
-  const getBackendToken = useCallback(async () => {
-    const tokenRes = await fetch("/api/auth/token", { credentials: "include" });
-    if (!tokenRes.ok) throw new Error("Failed to get backend JWT");
-    const { token } = await tokenRes.json();
-    return token;
-  }, []);
-
-  // Fetch user data from Spring backend using backend JWT
-  // technically don't need to this to fetch data
-  // since the user stuff comes from our current session object
-  // replace this with an actual call
-  // const fetchUserData = useCallback(async () => {
-  //   setDataLoading(true);
-  //   setDataError(null);
-
-  //   try {
-  //     const token = await getBackendToken();
-  //     const res = await fetch(
-  //       `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/balance/userdata`,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       }
-  //     );
-
-  //     if (!res.ok) throw new Error(`Failed to fetch user data: ${res.status}`);
-  //     const data = await res.json();
-  //     setUserData(data);
-  //   } catch (err: unknown) {
-  //     if (err instanceof Error) setDataError(err.message);
-  //     else setDataError("Unknown error");
-  //     setUserData(null);
-  //   } finally {
-  //     setDataLoading(false);
-  //   }
-  // }, [getBackendToken]);
-
-  // Trigger fetching whenever the user is authenticated
-  // useEffect(() => {
-  //   if (!isAuthenticated) return;
-  //   fetchUserData();
-  // }, [isAuthenticated, fetchUserData]);
 
   if (isLoading) {
     return (
@@ -91,28 +107,13 @@ export default function Home() {
   if (!isAuthenticated) {
     return (
       <main className="flex h-screen items-center justify-center">
-        <Button onClick={signInWithGoogle}>
-            Sign in with Google
-          </Button>
+        <Button onClick={signInWithGoogle}>Sign in with Google</Button>
       </main>
     );
   }
 
   return (
     <main className="flex justify-center mt-12">
-      {/* <div className="text-center space-y-4">
-        <p className="text-lg">Welcome! You are signed in.</p>
-        <div className="space-y-2">
-          <p>Better Auth User Id: {user?.id}</p>
-          <p>Email: {user?.email}</p>
-        </div>
-        <button
-          className="px-6 py-3 rounded-md bg-blue-600 text-white text-lg hover:bg-blue-700 transition-colors"
-          onClick={signOut}
-        >
-          Sign Out
-        </button>
-      </div> */}
       <div className="w-[70%] space-y-4">
         <div className="flex gap-2">
           <Button onClick={() => setOpen(true)}>Add Transaction</Button>
@@ -124,24 +125,25 @@ export default function Home() {
           </Button>
         </div>
 
+        {isFetching && <p className="text-sm">Refreshing…</p>}
+
         <TransactionTable
           transactions={transactions}
           onEdit={tx => {
-            setEditing(tx)
-            setOpen(true)
+            setEditing(tx);
+            setOpen(true);
           }}
-          onDelete={id =>
-            setTransactions(prev => prev.filter(t => t.id !== id))
-          }
+          onDelete={id => deleteMutation.mutate(id)}
         />
 
         <TransactionModal
+          key={editing?.id ?? "new"}
           open={open}
           onOpenChange={setOpen}
           initialData={editing}
-          onSave={save}
+          onSave={tx => saveMutation.mutate(tx)}
         />
       </div>
     </main>
-  )
+  );
 }
