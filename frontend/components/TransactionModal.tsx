@@ -16,13 +16,13 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
-import { Transaction, TransactionType, PayPeriod } from "@/types/transaction";
+import { TransactionInput, TransactionEntity, TransactionType, PayPeriod } from "@/types/transaction";
 
 interface Props {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  initialData: Transaction | null
-  onSave: (tx: Transaction) => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  initialData: TransactionEntity | null;
+  onSave: (tx: TransactionInput) => void;
 }
 
 export default function TransactionModal({
@@ -32,22 +32,16 @@ export default function TransactionModal({
   onSave
 }: Props) {
 
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<TransactionInput>({
     sourceName: initialData?.sourceName ?? "",
-    amount: initialData?.amount ? String(initialData.amount) : "",
+    amount: initialData?.amount ?? 0,
     date: initialData?.date ?? "",
     type: initialData?.type ?? TransactionType.INCOME,
     payPeriod: initialData?.payPeriod ?? PayPeriod.WEEKLY,
   });
 
   function submit() {
-    onSave({
-      sourceName: form.sourceName,
-      amount: Number(form.amount),
-      date: form.date,
-      type: form.type,
-      payPeriod: form.payPeriod
-    });
+    onSave(form);
   }
 
 
@@ -71,7 +65,7 @@ export default function TransactionModal({
             type="number"
             placeholder="Amount"
             value={form.amount}
-            onChange={e => setForm(f => ({ ...f, amount: e.target.value }))}
+            onChange={e => setForm(f => ({ ...f, amount: Number(e.target.value) }))}
           />
 
           <Input

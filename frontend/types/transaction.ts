@@ -1,5 +1,5 @@
 
-export type Transaction = {
+export type TransactionInput = {
     sourceName: string;
     amount: number;
     date: string;
@@ -7,7 +7,7 @@ export type Transaction = {
     payPeriod: PayPeriod;
 };
 
-export type TransactionEntity = Transaction &  {
+export type TransactionEntity = TransactionInput &  {
     id: string;
 };
 
@@ -18,7 +18,6 @@ export enum TransactionType {
 
 export enum PayPeriod {
     WEEKLY = "WEEKLY",
-    BIWEEKLY = "BIWEEKLY",
     MONTHLY = "MONTHLY",
-    YEARLY = "YEARLY",
+    SEMIMONTHLY = "SEMIMONTHLY",
 }

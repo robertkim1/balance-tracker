@@ -14,8 +14,5 @@ public interface TransactionEntityRepository extends JpaRepository<TransactionEn
      */
     List<TransactionEntity> findByUserId(UUID userId);
 
-    /**
-     * Delete all transactions for a specific user
-     */
-    void deleteByUserId(UUID userId);
+    void deleteByIdAndUserId(UUID id, UUID userId);
 }

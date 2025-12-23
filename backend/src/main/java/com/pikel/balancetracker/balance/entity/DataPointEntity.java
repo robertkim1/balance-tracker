@@ -26,6 +26,9 @@ public class DataPointEntity {
     @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
 
+    @Column(name = "user_id", updatable = false, nullable = false)
+    private UUID userId;
+
     @Column(name = "date", nullable = false)
     private LocalDate date;
 

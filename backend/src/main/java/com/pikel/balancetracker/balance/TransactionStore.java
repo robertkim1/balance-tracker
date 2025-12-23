@@ -20,14 +20,13 @@ public class TransactionStore {
         return repo.findByUserId(userId);
     }
 
-    public void deleteByUserId(UUID userId) {
-        repo.deleteByUserId(userId);
+    public void deleteByIdAndUserId(UUID userId, UUID transactionId) {
+        repo.deleteByIdAndUserId(transactionId, userId);
     }
 
     public void save(TransactionEntity entity) {
         repo.save(entity);
     }
-
 
 }
 

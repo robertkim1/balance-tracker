@@ -21,10 +21,15 @@ CREATE INDEX idx_transaction_user_date ON balance.transaction(user_id, date);
 
 CREATE TABLE balance.datapoint (
                            id UUID PRIMARY KEY,
+                           user_id UUID NOT NULL,
                            date DATE NOT NULL,
                            balance DECIMAL(10, 2) NOT NULL,
                            created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-                           updated_at TIMESTAMP
+                           updated_at TIMESTAMP,
+                           CONSTRAINT fk_transaction_user
+                               FOREIGN KEY (user_id)
+                                   REFERENCES appauth.user(id)
+                                   ON DELETE CASCADE
 );
 
 CREATE INDEX idx_datapoint_date ON balance.datapoint(date);

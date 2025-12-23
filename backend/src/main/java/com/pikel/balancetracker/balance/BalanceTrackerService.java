@@ -3,10 +3,10 @@ package com.pikel.balancetracker.balance;
 import com.pikel.balancetracker.balance.entity.TransactionEntity;
 import com.pikel.balancetracker.exception.BalanceTrackerException;
 import com.pikel.balancetracker.balance.model.*;
-import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -25,28 +25,30 @@ public class BalanceTrackerService {
         this.balanceEngine = balanceEngine;
     }
 
+    @Transactional
     public List<TransactionEntity> getUserTransactions(UUID userId) {
         return transactionStore.findByUserId(userId);
     }
 
     @Transactional
-    public TransactionEntity saveUserTransaction(UUID userId, Transaction transaction) {
-        try {
-            TransactionEntity transactionEntity = TransactionEntity.builder()
-                    .userId(userId)
-                    .sourceName(transaction.sourceName())
-                    .amount(BigDecimal.valueOf(transaction.amount()))
-                    .date(transaction.date())
-                    .type(transaction.type())
-                    .payPeriod(transaction.payPeriod())
-                    .build();
-            transactionStore.save(transactionEntity);
-            logger.info("Saved transaction {}", transactionEntity);
-            return transactionEntity;
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            throw new BalanceTrackerException("Failed to save transaction: " + e.getMessage(), e);
-        }
+    public void deleteUserTransaction(UUID transactionId, UUID userId) {
+        transactionStore.deleteByIdAndUserId(userId, transactionId);
+    }
+
+    @Transactional
+    public TransactionEntity saveUserTransaction(UUID userId, UUID transactionId, Transaction transaction) {
+        TransactionEntity transactionEntity = TransactionEntity.builder()
+                .id(transactionId)
+                .userId(userId)
+                .sourceName(transaction.sourceName())
+                .amount(BigDecimal.valueOf(transaction.amount()))
+                .date(transaction.date())
+                .type(transaction.type())
+                .payPeriod(transaction.payPeriod())
+                .build();
+        transactionStore.save(transactionEntity);
+        logger.info("Saved transaction {}", transactionEntity);
+        return transactionEntity;
     }
 
     public List<DataPointPerDate> getBalanceSummary(BalanceDataRequest request) {

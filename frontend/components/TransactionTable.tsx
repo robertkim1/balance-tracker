@@ -7,12 +7,12 @@ import {
   TableRow
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Transaction } from "@/types/transaction";
+import { TransactionEntity } from "@/types/transaction";
 
 interface Props {
-  transactions: Transaction[]
-  onEdit: (tx: Transaction) => void
-  onDelete: (id: string) => void
+  transactions: TransactionEntity[];
+  onEdit: (tx: TransactionEntity) => void;
+  onDelete: (id: string) => void;
 }
 
 export default function TransactionTable({ transactions, onEdit, onDelete }: Props) {
