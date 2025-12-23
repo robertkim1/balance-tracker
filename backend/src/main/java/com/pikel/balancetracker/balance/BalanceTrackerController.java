@@ -6,9 +6,6 @@ import com.pikel.balancetracker.balance.entity.TransactionEntity;
 import com.pikel.balancetracker.balance.model.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -33,7 +30,6 @@ public class BalanceTrackerController {
     /**
      * GET endpoint - Fetch user's existing transactions
      */
-    @Cacheable(value = "transactions", key = "#userId")
     @GetMapping("/transactions")
     public ResponseEntity<List<TransactionEntity>> getUserTransactions(
             @AuthenticationPrincipal Jwt jwt) {
@@ -48,7 +44,6 @@ public class BalanceTrackerController {
         return ResponseEntity.ok(transactions);
     }
 
-    @CachePut(value = "transactions", key = "#userId")
     @PostMapping("/transactions")
     public ResponseEntity<TransactionEntity> createUserTransaction(@RequestBody Transaction transaction,
                                                                    @AuthenticationPrincipal Jwt jwt) {
@@ -65,7 +60,6 @@ public class BalanceTrackerController {
     }
 
     // update endpoint
-    @CachePut(value = "transactions", key = "#userId")
     @PutMapping("/transactions/{id}")
     public ResponseEntity<TransactionEntity> updateUserTransaction(@PathVariable UUID id, @RequestBody Transaction transaction,
                                                                    @AuthenticationPrincipal Jwt jwt) {
@@ -80,7 +74,6 @@ public class BalanceTrackerController {
         return ResponseEntity.created(location).body(saved);
     }
 
-    @CacheEvict(value = "transactions", key = "#userId")
     @DeleteMapping("/transactions/{id}")
     public ResponseEntity<Void> deleteUserTransaction(@PathVariable UUID id, @AuthenticationPrincipal Jwt jwt) {
         UUID userId = UUID.fromString(jwt.getSubject());

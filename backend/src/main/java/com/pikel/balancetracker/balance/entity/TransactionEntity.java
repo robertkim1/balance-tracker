@@ -4,6 +4,9 @@ import com.pikel.balancetracker.balance.model.PayPeriod;
 import com.pikel.balancetracker.balance.model.TransactionType;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.io.Serial;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Instant;
@@ -17,7 +20,10 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 @ToString
-public class TransactionEntity {
+public class TransactionEntity implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     @Id
     @Column(name = "id", updatable = false, nullable = false)
