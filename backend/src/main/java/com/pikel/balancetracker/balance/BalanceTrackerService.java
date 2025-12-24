@@ -29,7 +29,7 @@ public class BalanceTrackerService {
     }
 
     @Cacheable(value = "transactions", key = "#userId")
-    @Transactional
+    @Transactional(readOnly = true)
     public List<TransactionEntity> getUserTransactions(UUID userId) {
         return transactionStore.findByUserId(userId);
     }
@@ -40,7 +40,7 @@ public class BalanceTrackerService {
         transactionStore.deleteByIdAndUserId(userId, transactionId);
     }
 
-    @CachePut(value = "transactions", key = "#userId")
+    @CacheEvict(value = "transactions", key = "#userId")
     @Transactional
     public TransactionEntity saveUserTransaction(UUID userId, UUID transactionId, Transaction transaction) {
         TransactionEntity transactionEntity = TransactionEntity.builder()
