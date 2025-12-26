@@ -12,14 +12,18 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import { ProjectionTimeframe } from "@/types/submit";
+import { BalanceDataRequest, ProjectionTimeframe, SummarizeDateBy } from "@/types/submit";
+import { Input } from "@/components/ui/input";
 
 export default function Home() {
   const { isAuthenticated, isLoading, signInWithGoogle, signOut } = useAuth();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<TransactionEntity | null>(null);
   const [modalKeyCounter, setModalKeyCounter] = useState(0);
-  const [projectionTimeframe, setProjectionTimeframe] = useState<ProjectionTimeframe | "">("");
+  const [projectionTimeframe, setProjectionTimeframe] = useState<ProjectionTimeframe>(ProjectionTimeframe.ONE_YEAR);
+  const [summarizeDateBy, setSummarizeDateBy] = useState<SummarizeDateBy>(SummarizeDateBy.DAY);
+  const [startDate, setStartDate] = useState("");
+  const [currBalance, setCurrBalance] = useState(0);
   const queryClient = useQueryClient();
 
   function openModal(tx?: TransactionEntity) {
@@ -103,10 +107,17 @@ export default function Home() {
   });
 
   function submitAll() {
-    fetch("/api/submit", {
+    const request: BalanceDataRequest = {
+      transactions,
+      currBalance,
+      summarizeDateBy,
+      projectionTimeframe,
+      startDate,
+    };
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/balance/submit`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(transactions),
+      body: JSON.stringify(request),
     });
   }
 
@@ -134,6 +145,11 @@ export default function Home() {
           <Button variant="secondary" onClick={submitAll}>
             Submit All
           </Button>
+          <Input
+            placeholder="Current Balance"
+            value={currBalance}
+            onChange={(e) => setCurrBalance(Number(e.target.value))}
+          />
           <Select
             value={projectionTimeframe}
             onValueChange={(v) => setProjectionTimeframe(v as ProjectionTimeframe)}
@@ -147,6 +163,24 @@ export default function Home() {
               <SelectItem value={ProjectionTimeframe.FIVE_YEARS}>Five Years</SelectItem>
             </SelectContent>
           </Select>
+          <Select
+            value={summarizeDateBy}
+            onValueChange={(v) => setSummarizeDateBy(v as SummarizeDateBy)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Summarize Date By" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={SummarizeDateBy.DAY}>Day</SelectItem>
+              <SelectItem value={SummarizeDateBy.MONTH}>Month</SelectItem>
+              <SelectItem value={SummarizeDateBy.YEAR}>Year</SelectItem>
+            </SelectContent>
+          </Select>
+          <Input
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+          />
           <Button variant="secondary" onClick={signOut}>
             Sign Out
           </Button>
