@@ -4,11 +4,11 @@ import com.pikel.balancetracker.balance.model.BalanceDataRequest;
 import com.pikel.balancetracker.balance.model.DataPointPerDate;
 import com.pikel.balancetracker.balance.entity.TransactionEntity;
 import com.pikel.balancetracker.balance.model.Transaction;
+import com.pikel.balancetracker.security.UserPrincipal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -32,9 +32,8 @@ public class BalanceTrackerController {
      */
     @GetMapping("/transactions")
     public ResponseEntity<List<TransactionEntity>> getUserTransactions(
-            @AuthenticationPrincipal Jwt jwt) {
-
-        UUID userId = UUID.fromString(jwt.getSubject());
+            @AuthenticationPrincipal UserPrincipal user) {
+        UUID userId = user.userId();
 
         logger.info("Fetching transactions for userid: {}", userId);
 
@@ -46,8 +45,8 @@ public class BalanceTrackerController {
 
     @PostMapping("/transactions")
     public ResponseEntity<TransactionEntity> createUserTransaction(@RequestBody Transaction transaction,
-                                                                   @AuthenticationPrincipal Jwt jwt) {
-        UUID userId = UUID.fromString(jwt.getSubject());
+                                                                   @AuthenticationPrincipal UserPrincipal user) {
+        UUID userId = user.userId();
         UUID transactionId = UUID.randomUUID();
         TransactionEntity saved = balanceTrackerService.saveUserTransaction(userId, transactionId, transaction);
         logger.info("Created transaction for userid: {}", userId);
@@ -62,8 +61,8 @@ public class BalanceTrackerController {
     // update endpoint
     @PutMapping("/transactions/{id}")
     public ResponseEntity<TransactionEntity> updateUserTransaction(@PathVariable UUID id, @RequestBody Transaction transaction,
-                                                                   @AuthenticationPrincipal Jwt jwt) {
-        UUID userId = UUID.fromString(jwt.getSubject());
+                                                                   @AuthenticationPrincipal UserPrincipal user) {
+        UUID userId = user.userId();
         TransactionEntity saved = balanceTrackerService.saveUserTransaction(userId, id, transaction);
         logger.info("Updated transaction for userid: {}, transactionid: {}", userId, id);
         URI location = ServletUriComponentsBuilder
@@ -75,8 +74,8 @@ public class BalanceTrackerController {
     }
 
     @DeleteMapping("/transactions/{id}")
-    public ResponseEntity<Void> deleteUserTransaction(@PathVariable UUID id, @AuthenticationPrincipal Jwt jwt) {
-        UUID userId = UUID.fromString(jwt.getSubject());
+    public ResponseEntity<Void> deleteUserTransaction(@PathVariable UUID id, @AuthenticationPrincipal UserPrincipal user) {
+        UUID userId = user.userId();
         balanceTrackerService.deleteUserTransaction(id, userId);
         return ResponseEntity.noContent().build();
     }
@@ -87,13 +86,11 @@ public class BalanceTrackerController {
     @PostMapping("/submit")
     public ResponseEntity<List<DataPointPerDate>> submitBalanceData(
             @RequestBody BalanceDataRequest request,
-            @AuthenticationPrincipal Jwt jwt) {
+            @AuthenticationPrincipal UserPrincipal user) {
 
-        UUID userId = UUID.fromString(jwt.getSubject());
-        String userEmail = jwt.getClaimAsString("email");
+        UUID userId = user.userId();
 
-        logger.info("Received balance data request from user: {} (ID: {}) with {} transactions",
-                userEmail,
+        logger.info("Received balance data request from user ID: {} with {} transactions",
                 userId,
                 request.transactions() != null ? request.transactions().size() : 0);
 
@@ -103,7 +100,7 @@ public class BalanceTrackerController {
         // Calculate and return balance summary
         List<DataPointPerDate> balanceSummary = balanceTrackerService.getBalanceSummary(request);
 
-        logger.info("Successfully saved transactions and generated balance summary for user: {}", userEmail);
+        logger.info("Successfully saved transactions and generated balance summary for user ID: {}", userId);
         return ResponseEntity.ok(balanceSummary);
     }
 }

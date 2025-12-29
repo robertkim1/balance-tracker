@@ -106,7 +106,7 @@ export default function Home() {
     },
   });
 
-  function submitAll() {
+  async function submitAll() {
     const request: BalanceDataRequest = {
       transactions,
       currBalance,
@@ -114,9 +114,11 @@ export default function Home() {
       projectionTimeframe,
       startDate,
     };
+    const token = await getBackendToken();
     fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/balance/submit`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json" },
       body: JSON.stringify(request),
     });
   }

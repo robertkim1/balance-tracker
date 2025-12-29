@@ -28,8 +28,10 @@ public class SecurityConfig {
     @Value("${backend.jwt.secret}")
     private String backendJwtSecret;
 
+    private JWTToUserConverter jwtToUserConverter;
+
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, JWTToUserConverter jwtToUserConverter) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -39,10 +41,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/test/**").permitAll()
                         .requestMatchers("/api/balance/**").authenticated()
-                        .anyRequest().permitAll()
-                )
+                        .anyRequest().denyAll())
                 .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(jwt -> jwt.decoder(jwtDecoder()))
+                        .jwt(jwt -> jwt.decoder(jwtDecoder()).jwtAuthenticationConverter(jwtToUserConverter))
                 );
 
         return http.build();
