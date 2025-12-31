@@ -22,8 +22,8 @@ export async function GET() {
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("15m")
-    .setIssuer("xxxxxxxxx-nextjs")
-    .setAudience("xxxxxxxxx-spring")
+    .setIssuer("balance-tracker-nextjs")
+    .setAudience("balance-tracker-spring")
     .sign(secret);
 
   return NextResponse.json({ token: jwt });

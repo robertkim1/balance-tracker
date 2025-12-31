@@ -7,7 +7,13 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
+import org.springframework.security.oauth2.core.OAuth2Error;
+import org.springframework.security.oauth2.core.OAuth2TokenValidator;
+import org.springframework.security.oauth2.core.OAuth2TokenValidatorResult;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
@@ -27,11 +33,21 @@ public class SecurityConfig {
 
     @Value("${backend.jwt.secret}")
     private String backendJwtSecret;
+    
+    @Value("${backend.jwt.issuer}")
+    private String jwtIssuer;
+    
+    @Value("${backend.jwt.audience}")
+    private String jwtAudience;
 
-    private JWTToUserConverter jwtToUserConverter;
+    private final JWTToUserConverter jwtToUserConverter;
+
+    public SecurityConfig(JWTToUserConverter jwtToUserConverter) {
+        this.jwtToUserConverter = jwtToUserConverter;
+    }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, JWTToUserConverter jwtToUserConverter) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -53,7 +69,28 @@ public class SecurityConfig {
     public JwtDecoder jwtDecoder() {
         byte[] keyBytes = backendJwtSecret.getBytes(StandardCharsets.UTF_8);
         SecretKeySpec key = new SecretKeySpec(keyBytes, "HmacSHA256");
-        return NimbusJwtDecoder.withSecretKey(key).build();
+        NimbusJwtDecoder decoder = NimbusJwtDecoder.withSecretKey(key).build();
+        OAuth2TokenValidator<Jwt> issuerValidator =
+                JwtValidators.createDefaultWithIssuer(jwtIssuer);
+
+        OAuth2TokenValidator<Jwt> validator = getJwtOAuth2TokenValidator(issuerValidator);
+
+        decoder.setJwtValidator(validator);
+        return decoder;
+    }
+
+    private OAuth2TokenValidator<Jwt> getJwtOAuth2TokenValidator(OAuth2TokenValidator<Jwt> issuerValidator) {
+        OAuth2TokenValidator<Jwt> audienceValidator =
+                token -> token.getAudience().contains(jwtAudience)
+                        ? OAuth2TokenValidatorResult.success()
+                        : OAuth2TokenValidatorResult.failure(
+                        new OAuth2Error("invalid_token", "Invalid audience", null)
+                );
+
+        return new DelegatingOAuth2TokenValidator<>(
+                issuerValidator,
+                audienceValidator
+        );
     }
 
     @Bean
