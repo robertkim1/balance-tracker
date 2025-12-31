@@ -7,12 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectTrigger, SelectContent, SelectValue, SelectItem } from "@/components/ui/select";
 import TransactionTable from "@/components/TransactionTable";
 import TransactionModal from "@/components/TransactionModal";
+import BalanceChart from "@/components/BalanceChart";
 import {
   useQuery,
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import { BalanceDataRequest, ProjectionTimeframe, SummarizeDateBy } from "@/types/submit";
+import { BalanceDataRequest, ProjectionDataItem, ProjectionTimeframe, SummarizeDateBy } from "@/types/dashboard";
 import { Input } from "@/components/ui/input";
 
 export default function Home() {
@@ -24,6 +25,7 @@ export default function Home() {
   const [summarizeDateBy, setSummarizeDateBy] = useState<SummarizeDateBy>(SummarizeDateBy.DAY);
   const [startDate, setStartDate] = useState("");
   const [currBalance, setCurrBalance] = useState(0);
+  const [projectionData, setProjectionData] = useState<ProjectionDataItem[]>([]);
   const queryClient = useQueryClient();
 
   function openModal(tx?: TransactionEntity) {
@@ -115,12 +117,14 @@ export default function Home() {
       startDate,
     };
     const token = await getBackendToken();
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/balance/submit`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/balance/submit`, {
       method: "POST",
       headers: { Authorization: `Bearer ${token}`,
         "Content-Type": "application/json" },
       body: JSON.stringify(request),
     });
+    const data = await res.json();
+    setProjectionData(data);
   }
 
   if (isLoading) {
@@ -197,6 +201,12 @@ export default function Home() {
           }
           onDelete={id => deleteMutation.mutate(id)}
         />
+
+        {projectionData.length > 0 && (
+          <div className="mt-6">
+            <BalanceChart projectionData={projectionData} />
+          </div>
+        )}
 
         <TransactionModal
           key={editing?.id ?? `new-${modalKeyCounter}`}

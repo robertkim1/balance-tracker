@@ -19,3 +19,13 @@ export type BalanceDataRequest = {
     startDate: string;
     projectionTimeframe: ProjectionTimeframe;
 }
+
+export type ProjectionDataPoint = {
+  balance: number;
+  transactionList: TransactionEntity[];
+};
+
+export type ProjectionDataItem = {
+  dataPoint: ProjectionDataPoint;
+  date: string;
+};
