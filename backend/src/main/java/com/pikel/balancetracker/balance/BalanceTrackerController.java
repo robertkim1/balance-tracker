@@ -27,6 +27,8 @@ public class BalanceTrackerController {
         this.balanceTrackerService = balanceTrackerService;
     }
 
+    // TODO: make a dashboard endpoint to retrieve transactions and datapoints from cache/db
+
     /**
      * GET endpoint - Fetch user's existing transactions
      */

@@ -59,6 +59,7 @@ public class BalanceTrackerService {
 
     public List<DataPointPerDate> getBalanceSummary(BalanceDataRequest request) {
         return balanceEngine.getBalanceSummary(request);
+        // TODO: save datapoints per call
     }
 }
 
